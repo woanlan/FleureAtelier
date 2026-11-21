@@ -35,8 +35,8 @@
                 <img
                   [src]="stem.image"
                   [alt]="stem.name"
-                  width="64"
-                  height="64"
+                  width="52"
+                  height="52"
                   loading="eager"
                   decoding="async"
                   class="stem-thumb"
@@ -48,41 +48,36 @@
                 ></span>
               </div>
 
-              <!-- Nhóm nội dung & bộ đếm số lượng -->
+              <!-- Thông tin gọn đều nhau & bộ tăng giảm ngay bên dưới -->
               <div class="stem-body">
                 <div class="stem-info-group">
                   <h3 class="stem-name">{{ stem.name }}</h3>
-                  <p class="stem-origin">{{ stem.origin }}</p>
-                  <p class="stem-note">{{ stem.seasonNote }}</p>
-                </div>
-
-                <div class="stem-footer">
                   <span class="stem-price tabular-nums">
                     {{ atelier.formatVnd(stem.pricePerStem) }}<span class="stem-unit">/cành</span>
                   </span>
+                </div>
 
-                  <!-- Bộ tăng giảm số lượng cành chuẩn vùng chạm >= 44x44px -->
-                  <div class="stem-stepper" role="group" [attr.aria-label]="'Số lượng ' + stem.name">
-                    <button
-                      type="button"
-                      class="stepper-btn"
-                      (click)="atelier.decrementStem(stem.id)"
-                      [disabled]="qty === 0"
-                      [attr.aria-label]="'Giảm cành ' + stem.name"
-                    >
-                      <span class="stepper-hit" aria-hidden="true">−</span>
-                    </button>
-                    <span class="stem-qty tabular-nums">{{ qty }}</span>
-                    <button
-                      type="button"
-                      class="stepper-btn"
-                      (click)="atelier.incrementStem(stem.id)"
-                      [disabled]="qty >= maxStemPerVariety"
-                      [attr.aria-label]="'Thêm cành ' + stem.name"
-                    >
-                      <span class="stepper-hit" aria-hidden="true">+</span>
-                    </button>
-                  </div>
+                <!-- Bộ tăng giảm số lượng cành gọn tay (44px trên mobile, 34px gọn gàng trên desktop) -->
+                <div class="stem-stepper" role="group" [attr.aria-label]="'Số lượng ' + stem.name">
+                  <button
+                    type="button"
+                    class="stepper-btn"
+                    (click)="atelier.decrementStem(stem.id)"
+                    [disabled]="qty === 0"
+                    [attr.aria-label]="'Giảm cành ' + stem.name"
+                  >
+                    <span class="stepper-hit" aria-hidden="true">−</span>
+                  </button>
+                  <span class="stem-qty tabular-nums">{{ qty }}</span>
+                  <button
+                    type="button"
+                    class="stepper-btn"
+                    (click)="atelier.incrementStem(stem.id)"
+                    [disabled]="qty >= maxStemPerVariety"
+                    [attr.aria-label]="'Thêm cành ' + stem.name"
+                  >
+                    <span class="stepper-hit" aria-hidden="true">+</span>
+                  </button>
                 </div>
               </div>
             </article>
@@ -95,24 +90,21 @@
            ===================================================================== -->
       <div class="studio-col studio-stage-col">
         <div class="bouquet-pedestal">
-          <!-- Thanh trạng thái chế độ gói giấy / xếp cành rời & tổng số cành -->
+          <!-- Thanh trạng thái tinh gọn 2 vế -->
           <div class="pedestal-topbar">
-            <span class="pedestal-tag">
-              {{ isWrapped() ? wrapDisplayLabel() : 'Đang xếp cành rời' }}
+            <span class="pedestal-tag tabular-nums">
+              {{ atelier.totalCustomStems() }} cành · {{ isWrapped() ? wrapDisplayLabel() : 'Cành rời' }}
             </span>
 
-            <div class="pedestal-top-actions">
-              @if (atelier.totalCustomStems() > 0) {
-                <button
-                  type="button"
-                  class="stage-mode-toggle"
-                  (click)="toggleWrapPreview()"
-                >
-                  {{ isWrapped() ? 'Xem cành rời' : 'Bó giấy ngay' }}
-                </button>
-              }
-              <span class="pedestal-count tabular-nums">{{ atelier.totalCustomStems() }} cành</span>
-            </div>
+            @if (atelier.totalCustomStems() > 0) {
+              <button
+                type="button"
+                class="stage-mode-toggle"
+                (click)="toggleWrapPreview()"
+              >
+                {{ isWrapped() ? 'Xem cành rời' : 'Bó giấy ngay' }}
+              </button>
+            }
           </div>
 
           <div
@@ -240,7 +232,7 @@
           </div>
 
           <p class="stage-footnote">
-            Mỗi lần bấm <strong>+</strong> một cành hoa thật sẽ bay vào bó; bấm <strong>Bó hoa</strong> hoặc chọn màu giấy để gói lụa hoàn chỉnh.
+            Nghệ nhân FLEURÉ bó tay xoắn gốc cùng lá khuynh diệp bạc tươi mỗi sáng.
           </p>
         </div>
       </div>
@@ -292,7 +284,6 @@
                       +{{ atelier.formatVnd(wrap.price) }}
                     </span>
                   </span>
-                  <span class="wrap-option-desc">{{ wrap.description }}</span>
                 </span>
               </button>
             }

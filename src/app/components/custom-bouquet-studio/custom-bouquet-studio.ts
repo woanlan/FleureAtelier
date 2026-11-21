@@ -52,36 +52,38 @@ const MAX_STEM_PER_ITEM = 30;
 const MIN_STEMS_TO_WRAP = 3;
 
 /**
- * 18 vị trí cắm hoa xoắn gốc (spiral hand-tied) chuẩn kỹ thuật tiệm hoa Pháp–Hàn:
- * giữ cành đan chéo tại nút eo bó (`transform-origin: 50% 80%`) và xòe tròn hài hòa.
+ * 18 vị trí cắm hoa xoắn gốc (spiral hand-tied) đan xen cân đối trái – phải:
+ * đảo chiều cặp 3–4 và 5–6 để khi phối 2 loài hoa (VD: 3 Hồng Juliet + 2 Mẫu Đơn),
+ * sắc hoa phân bổ đều hai bên thay vì dồn lệch 1 phía, đồng thời mặt hoa ngồi sát cổ giấy chữ V.
  */
 const HAND_TIED_SLOTS: readonly HandTiedStemSlot[] = [
-  // Tâm điểm & cặp ôm hai bên (3 cành đầu tiên cân đối, thoáng từng bông hoa)
-  { angleDeg: -1, offsetX: 0, offsetY: 3.5, scale: 1.03, zIndex: 34 },
-  { angleDeg: -16, offsetX: -9.5, offsetY: -2.0, scale: 0.99, zIndex: 30 },
+  // Slot 0: Tâm điểm tiền cảnh ôm sát cổ chữ V
+  { angleDeg: -1, offsetX: 0, offsetY: 4.5, scale: 1.03, zIndex: 35 },
+  // Slot 1 & 2: Cặp tầng giữa trái / phải
+  { angleDeg: -15, offsetX: -9.5, offsetY: -1.5, scale: 0.99, zIndex: 30 },
   { angleDeg: 15, offsetX: 9.5, offsetY: -1.5, scale: 0.99, zIndex: 31 },
-  // 2 cành mở rộng hai cánh trái/phải (5 cành xòe tròn khoe trọn từng bông)
-  { angleDeg: -26, offsetX: -16.5, offsetY: 2.5, scale: 0.95, zIndex: 27 },
-  { angleDeg: 25, offsetX: 16.5, offsetY: 3.0, scale: 0.95, zIndex: 28 },
-  // Lớp vòm cao phía sau — nhô hẳn lên trên để cành thứ 6, 7 luôn hiện rõ trọn mặt hoa
-  { angleDeg: -10, offsetX: -7.5, offsetY: -12.5, scale: 0.96, zIndex: 24 },
-  { angleDeg: 11, offsetX: 8.0, offsetY: -12.0, scale: 0.96, zIndex: 25 },
-  // Hai cánh ngoài vươn bay tự nhiên
-  { angleDeg: -32, offsetX: -20.0, offsetY: -4.5, scale: 0.92, zIndex: 21 },
-  { angleDeg: 31, offsetX: 20.0, offsetY: -4.0, scale: 0.92, zIndex: 22 },
-  // Lớp đỉnh trung tâm vươn cao (cực nổi cho Phi yến, Tulip, Hồng Đỏ, Lan)
-  { angleDeg: 0, offsetX: 0.5, offsetY: -14.5, scale: 0.93, zIndex: 20 },
-  // Lớp tiền cảnh thấp ôm sát cổ giấy chữ V
-  { angleDeg: -10, offsetX: -6.5, offsetY: 7.5, scale: 0.93, zIndex: 36 },
-  { angleDeg: 11, offsetX: 6.5, offsetY: 7.5, scale: 0.93, zIndex: 37 },
-  // Lớp vòm cao hai bên
-  { angleDeg: -20, offsetX: -13.5, offsetY: -11.0, scale: 0.91, zIndex: 18 },
-  { angleDeg: 20, offsetX: 13.5, offsetY: -10.5, scale: 0.91, zIndex: 19 },
-  // Lớp phụ điểm xuyết đầy đặn (15..18 cành)
-  { angleDeg: -36, offsetX: -22.0, offsetY: 3.5, scale: 0.88, zIndex: 16 },
-  { angleDeg: 36, offsetX: 22.0, offsetY: 3.5, scale: 0.88, zIndex: 17 },
-  { angleDeg: -17, offsetX: -11.5, offsetY: 8.0, scale: 0.89, zIndex: 35 },
-  { angleDeg: 17, offsetX: 11.5, offsetY: 8.0, scale: 0.89, zIndex: 38 },
+  // Slot 3 (PHẢI ngoài) & Slot 4 (TRÁI ngoài): đảo chiều giúp 2 loài hoa đan xen đối xứng 2 bên!
+  { angleDeg: 25, offsetX: 16.0, offsetY: 3.5, scale: 0.95, zIndex: 28 },
+  { angleDeg: -25, offsetX: -16.0, offsetY: 3.5, scale: 0.95, zIndex: 27 },
+  // Slot 5 & 6: Tầng vòm cao nhô rõ phía sau
+  { angleDeg: -9, offsetX: -7.0, offsetY: -10.5, scale: 0.95, zIndex: 24 },
+  { angleDeg: 10, offsetX: 7.5, offsetY: -10.5, scale: 0.95, zIndex: 25 },
+  // Slot 7 & 8: Hai cánh ngoài vươn bay tự nhiên
+  { angleDeg: 31, offsetX: 19.5, offsetY: -3.5, scale: 0.91, zIndex: 22 },
+  { angleDeg: -31, offsetX: -19.5, offsetY: -3.5, scale: 0.91, zIndex: 21 },
+  // Slot 9: Đỉnh trung tâm vươn cao (cực nổi cho Phi yến, Tulip, Lan, Hồng Đỏ)
+  { angleDeg: 0, offsetX: 0.5, offsetY: -12.5, scale: 0.92, zIndex: 20 },
+  // Slot 10 & 11: Tiền cảnh thấp ôm cổ giấy
+  { angleDeg: -9, offsetX: -6.0, offsetY: 8.0, scale: 0.92, zIndex: 36 },
+  { angleDeg: 10, offsetX: 6.0, offsetY: 8.0, scale: 0.92, zIndex: 37 },
+  // Slot 12 & 13: Vòm cao hai bên
+  { angleDeg: 19, offsetX: 13.0, offsetY: -9.5, scale: 0.90, zIndex: 19 },
+  { angleDeg: -19, offsetX: -13.0, offsetY: -9.5, scale: 0.90, zIndex: 18 },
+  // Slot 14..17: Lớp phụ điểm xuyết đầy đặn
+  { angleDeg: -35, offsetX: -21.5, offsetY: 4.0, scale: 0.87, zIndex: 16 },
+  { angleDeg: 35, offsetX: 21.5, offsetY: 4.0, scale: 0.87, zIndex: 17 },
+  { angleDeg: -16, offsetX: -11.0, offsetY: 8.5, scale: 0.88, zIndex: 34 },
+  { angleDeg: 16, offsetX: 11.0, offsetY: 8.5, scale: 0.88, zIndex: 38 },
 ];
 
 /**

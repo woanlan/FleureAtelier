@@ -14,32 +14,20 @@
         Chạm vào từng bó hoa treo trên kệ hồng kim để ngắm rõ sắc cánh hoa Đà Lạt và lớp giấy lụa Pháp.
       </p>
 
-      <!-- Trạng thái đồng bộ trực tiếp với Backend Render / MongoDB -->
-      <div class="catalog-sync-pill" role="status" aria-live="polite">
-        @switch (atelier.catalogStatus()) {
-          @case ('loading') {
-            <span class="sync-dot sync-dot--loading" aria-hidden="true"></span>
-            <span>Đang đồng bộ danh mục hoa tươi từ máy chủ FLEURÉ (MongoDB)...</span>
-          }
-          @case ('live') {
-            <span class="sync-dot sync-dot--live" aria-hidden="true"></span>
-            <span>
-              Đồng bộ trực tiếp <strong class="tabular-nums">{{ atelier.catalogCount() }}</strong> mẫu hoa từ hệ thống FLEURÉ (MongoDB)
-            </span>
-          }
-          @default {
-            <span class="sync-dot sync-dot--fallback" aria-hidden="true"></span>
-            <span>Đang hiển thị bộ sưu tập lưu sẵn</span>
-            <button
-              type="button"
-              class="sync-retry-btn"
-              (click)="atelier.loadCatalogFromApi()"
-            >
-              Thử đồng bộ lại
-            </button>
-          }
-        }
-      </div>
+      <!-- Chỉ hiển thị nút thử lại gọn gàng khi mất kết nối tạm thời với máy chủ -->
+      @if (atelier.catalogStatus() === 'fallback') {
+        <div class="catalog-sync-pill" role="status" aria-live="polite">
+          <span class="sync-dot sync-dot--fallback" aria-hidden="true"></span>
+          <span>Đang hiển thị bộ sưu tập lưu sẵn</span>
+          <button
+            type="button"
+            class="sync-retry-btn"
+            (click)="atelier.loadCatalogFromApi()"
+          >
+            Thử đồng bộ lại
+          </button>
+        </div>
+      }
     </header>
 
     <!-- Sân khấu kệ đồng treo 5 vị trí chiều sâu -->
@@ -78,8 +66,8 @@
                 <img
                   [src]="slot.bouquet.image"
                   [alt]="'Bó hoa ' + slot.bouquet.name + ' – ' + slot.bouquet.stemsSummary"
-                  width="896"
-                  height="1200"
+                  width="840"
+                  height="1060"
                   loading="eager"
                   decoding="async"
                   class="bouquet-cutout-img"

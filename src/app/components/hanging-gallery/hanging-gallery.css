@@ -205,21 +205,22 @@
   z-index: 3;
 }
 
-/* Dây mảnh 1px thả thẳng từ khoen xuống cuống bó hoa */
+/* Dây mảnh 1px thả thẳng từ khoen xuống nối chạm khít vào đỉnh bó hoa */
 .gold-cord {
   width: 1px;
-  height: 36px;
+  height: 54px;
+  margin-bottom: -14px;
   flex-shrink: 0;
-  background: linear-gradient(180deg, #fce2e8 0%, rgba(242, 184, 198, 0.44) 100%);
+  background: linear-gradient(180deg, #fce2e8 0%, rgba(242, 184, 198, 0.56) 100%);
   transform-origin: top center;
   transition: transform 520ms var(--ease-editorial);
 }
 
 .hanging-slot[data-slot='center'] .gold-cord {
-  transform: scaleY(1.38);
+  transform: scaleY(1.26);
 }
 
-/* Nút chứa ảnh bó hoa tách nền PNG */
+/* Nút chứa ảnh bó hoa tách nền PNG (đã cắt khít lề trên top_pad=6px) */
 .bouquet-hang-btn {
   display: flex;
   align-items: flex-start;
@@ -240,7 +241,7 @@
 .bouquet-cutout-img {
   width: 100%;
   height: auto;
-  aspect-ratio: 896 / 1200;
+  aspect-ratio: 840 / 1060;
   object-fit: contain;
   pointer-events: none;
   user-select: none;
