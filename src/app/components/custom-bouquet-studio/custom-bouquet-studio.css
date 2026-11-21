@@ -1,0 +1,990 @@
+/* ==========================================================================
+   PHÂN KHU BÀN TỰ PHỐI HOA (CUSTOM BOUQUET STUDIO)
+   Tuân thủ evondevKit: N1–N12, R1–R5, F8–F9, F24–F26, 0 tràn ngang ở 375px
+   ========================================================================== */
+
+:host {
+  display: block;
+}
+
+.studio-section {
+  scroll-margin-top: 5rem;
+  padding-block: var(--section-py);
+  background-color: var(--bg-cream-alt);
+  border-top: 1px solid var(--border-subtle);
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+/* --------------------------------------------------------------------------
+   Đầu mục phân khu
+   -------------------------------------------------------------------------- */
+.studio-header {
+  max-width: 44rem;
+  margin-bottom: clamp(2rem, 4vw, 3rem);
+}
+
+.studio-eyebrow {
+  font-family: var(--font-sans);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--gold-accent-ink);
+  margin-bottom: 0.5rem;
+}
+
+.studio-heading {
+  font-family: var(--font-serif);
+  font-size: clamp(2rem, 3.6vw, 2.75rem);
+  font-weight: 600;
+  line-height: 1.16;
+  color: var(--ink-primary);
+  text-wrap: balance;
+}
+
+.studio-subtitle {
+  margin-top: 0.75rem;
+  font-size: 1rem;
+  line-height: 1.6;
+  color: var(--ink-secondary);
+  text-wrap: pretty;
+  max-width: 62ch;
+}
+
+/* --------------------------------------------------------------------------
+   Khung bàn làm việc 3 cột (Mobile xếp dọc 1 cột -> Desktop >= 1080px 3 cột)
+   -------------------------------------------------------------------------- */
+.studio-workbench {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 1.5rem;
+  align-items: start;
+}
+
+@media (min-width: 1080px) {
+  .studio-workbench {
+    grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr) minmax(0, 0.95fr);
+    gap: 1.5rem;
+  }
+}
+
+.studio-col {
+  min-width: 0;
+}
+
+.col-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.col-step-label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--ink-primary);
+}
+
+.col-step-hint {
+  font-size: 0.75rem;
+  color: var(--ink-muted);
+}
+
+/* --------------------------------------------------------------------------
+   Cột trái: Lưới danh mục hoa tươi cắt cành
+   - < 640px (375px mobile): 1 cột thẻ ngang (tên không cắt cụt, nút 44x44px)
+   - >= 640px: lưới 2 cột cân đối, chân thẻ thẳng hàng bằng margin-top: auto
+   -------------------------------------------------------------------------- */
+.stem-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0.75rem;
+}
+
+@media (min-width: 640px) {
+  .stem-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.75rem;
+  }
+}
+
+.stem-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  min-width: 0;
+  padding: 1rem;
+  background-color: var(--surface-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  transition:
+    background-color 180ms ease,
+    border-color 180ms ease;
+}
+
+.stem-card.is-selected {
+  background-color: var(--surface-elevated);
+  border-color: var(--primary);
+}
+
+@media (min-width: 640px) {
+  .stem-card {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.75rem;
+  }
+}
+
+.stem-media {
+  position: relative;
+  flex-shrink: 0;
+  width: 64px;
+  height: 64px;
+}
+
+.stem-thumb {
+  width: 64px;
+  height: 64px;
+  border-radius: var(--radius-sm);
+  object-fit: cover;
+  border: 1px solid var(--border-subtle);
+  background-color: var(--bg-cream);
+}
+
+.stem-swatch-dot {
+  position: absolute;
+  right: 4px;
+  bottom: 4px;
+  width: 12px;
+  height: 12px;
+  border-radius: var(--radius-pill);
+  border: 2px solid var(--surface-card);
+}
+
+.stem-body {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.stem-info-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  min-width: 0;
+}
+
+/* N12: Tên loài hoa dùng h3 1rem font-weight 600, tuyệt đối không truncate 1 dòng */
+.stem-name {
+  font-family: var(--font-sans);
+  font-size: 1rem;
+  font-weight: 600;
+  line-height: 1.35;
+  color: var(--ink-primary);
+  overflow-wrap: break-word;
+  text-wrap: balance;
+}
+
+.stem-origin {
+  font-size: 0.75rem;
+  font-weight: 500;
+  line-height: 1.4;
+  color: var(--gold-accent-ink);
+  text-wrap: pretty;
+}
+
+.stem-note {
+  font-size: 0.8125rem;
+  line-height: 1.45;
+  color: var(--ink-secondary);
+  text-wrap: pretty;
+}
+
+.stem-footer {
+  margin-top: auto;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+@media (min-width: 1080px) {
+  /* Ở cột hẹp 3 cột desktop, xếp giá ngay trên bộ đếm để cả 2 luôn rộng rãi, không chèn ép */
+  .stem-footer {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+}
+
+.stem-price {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  line-height: 1.3;
+  color: var(--ink-primary);
+}
+
+.stem-unit {
+  font-size: 0.75rem;
+  font-weight: 400;
+  color: var(--ink-muted);
+}
+
+/* Bộ đếm số lượng cành chuẩn evondevKit quantity-input (1 khung liền, nút 44x44px, nền rê thụt vào) */
+.stem-stepper {
+  display: inline-flex;
+  align-items: center;
+  height: 44px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-md);
+  background-color: var(--surface-card);
+}
+
+.stepper-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 42px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--ink-primary);
+  flex-shrink: 0;
+}
+
+.stepper-hit {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-xs);
+  font-size: 1rem;
+  font-weight: 500;
+  line-height: 1;
+  color: var(--ink-secondary);
+  transition:
+    background-color 150ms ease,
+    color 150ms ease;
+}
+
+.stepper-btn:not(:disabled):hover .stepper-hit {
+  background-color: var(--primary-light);
+  color: var(--ink-primary);
+}
+
+.stem-qty {
+  min-width: 2rem;
+  padding-inline: 0.25rem;
+  text-align: center;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--ink-primary);
+}
+
+/* --------------------------------------------------------------------------
+   Cột giữa: Sân khấu minh họa bó hoa trực tiếp (Sticky trên Desktop >= 1080px)
+   -------------------------------------------------------------------------- */
+@media (min-width: 1080px) {
+  .studio-stage-col {
+    position: sticky;
+    top: 5.75rem;
+  }
+}
+
+.bouquet-pedestal {
+  padding: 1rem;
+  background-color: var(--surface-elevated);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+}
+
+@media (min-width: 640px) {
+  .bouquet-pedestal {
+    padding: 1.25rem;
+  }
+}
+
+.pedestal-topbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.pedestal-top-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.pedestal-tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.75rem;
+  border-radius: var(--radius-pill);
+  background-color: var(--surface-card);
+  border: 1px solid var(--border-subtle);
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--ink-secondary);
+}
+
+.stage-mode-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 36px;
+  padding: 0.25rem 0.75rem;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--border-strong);
+  background-color: var(--surface-card);
+  color: var(--primary);
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 160ms ease, border-color 160ms ease;
+}
+
+.stage-mode-toggle:hover {
+  background-color: var(--primary-light);
+  border-color: var(--primary);
+}
+
+@media (max-width: 1023.98px) {
+  .stage-mode-toggle {
+    min-height: 44px;
+    padding-inline: 0.875rem;
+  }
+}
+
+.pedestal-count {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--gold-accent-ink);
+}
+
+/* ==========================================================================
+   SÂN KHẤU GHÉP CÀNH HOA THẬT (4 LỚP TÁCH NỀN PNG + HIỆU ỨNG BAY & GÓI GIẤY)
+   ========================================================================== */
+.stage-canvas-wrap {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 4 / 5;
+  max-width: 440px;
+  margin-inline: auto;
+  border-radius: var(--radius-md);
+  background: radial-gradient(
+    ellipse 78% 72% at 50% 44%,
+    #ffffff 0%,
+    #fff7f9 55%,
+    #fcecf0 100%
+  );
+  border: 1px solid var(--border-subtle);
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.stage-spotlight-glow {
+  position: absolute;
+  inset: 10% 12% 16%;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    rgba(255, 255, 255, 0.88) 0%,
+    rgba(252, 231, 236, 0.2) 64%,
+    transparent 100%
+  );
+  pointer-events: none;
+  z-index: 0;
+}
+
+.bouquet-composition {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  z-index: 2;
+}
+
+/* --- LỚP 1: Quạt giấy lụa nền sau (bung nở khi bấm Bó hoa) --- */
+.wrap-back-layer {
+  position: absolute;
+  left: 50%;
+  top: 4%;
+  width: 84%;
+  height: 68%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  pointer-events: none;
+  opacity: 0;
+  transform: translate3d(-50%, 28px, 0) scale(0.82);
+  transform-origin: 50% 85%;
+  transition:
+    opacity 540ms var(--ease-editorial),
+    transform 640ms var(--ease-editorial);
+}
+
+.bouquet-composition.is-wrapped .wrap-back-layer {
+  opacity: 1;
+  transform: translate3d(-50%, 0, 0) scale(1);
+}
+
+.wrap-back-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  filter: drop-shadow(0 14px 22px rgba(45, 24, 32, 0.14));
+}
+
+/* --- LỚP 2: Hai nhành lá khuynh diệp bạc thật xòe ôm hai bên vòm hoa --- */
+.greenery-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 15;
+  pointer-events: none;
+}
+
+.eucalyptus-sprig {
+  position: absolute;
+  left: 50%;
+  top: 10%;
+  height: 58%;
+  width: auto;
+  object-fit: contain;
+  transform-origin: 50% 86%;
+  opacity: 0;
+  filter: drop-shadow(0 6px 12px rgba(45, 24, 32, 0.12));
+  transition:
+    opacity 520ms var(--ease-editorial) 60ms,
+    transform 660ms var(--ease-editorial) 60ms;
+}
+
+.eucalyptus-left {
+  transform: translate3d(-50%, 16px, 0) rotate(-10deg) scale(0.84);
+}
+
+.eucalyptus-right {
+  transform: translate3d(-50%, 16px, 0) scaleX(-1) rotate(-10deg) scale(0.84);
+}
+
+.bouquet-composition.is-wrapped .eucalyptus-left {
+  opacity: 0.96;
+  transform: translate3d(-86%, 4px, 0) rotate(-28deg) scale(1);
+}
+
+.bouquet-composition.is-wrapped .eucalyptus-right {
+  opacity: 0.96;
+  transform: translate3d(-14%, 4px, 0) scaleX(-1) rotate(-28deg) scale(1);
+}
+
+/* --- LỚP 3: Từng cành hoa đơn thật bay trượt từ trái vào bó xoắn gốc --- */
+.stems-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 20;
+  pointer-events: none;
+  transition:
+    transform 560ms var(--ease-editorial),
+    clip-path 480ms var(--ease-editorial);
+}
+
+/* Khi đã gói trong phễu giấy, cắt gọn phần cuống thừa dưới đáy phễu để bó gọn như ảnh chụp thật */
+.bouquet-composition.is-wrapped .stems-layer {
+  transform: translate3d(0, -1.5%, 0);
+  clip-path: inset(0 0 11% 0);
+}
+
+.stem-slot-anchor {
+  position: absolute;
+  left: 50%;
+  top: 15%;
+  height: 67%;
+  width: auto;
+  display: flex;
+  justify-content: center;
+  transform-origin: 50% 78%;
+  transform: translate3d(calc(-50% + var(--stem-x, 0%)), var(--stem-y, 0%), 0)
+    rotate(var(--stem-angle, 0deg)) scale(var(--stem-scale, 1));
+  transition: transform 520ms var(--ease-editorial);
+  will-change: transform;
+}
+
+.real-stem-img {
+  height: 100%;
+  width: auto;
+  max-width: none;
+  object-fit: contain;
+  filter: drop-shadow(0 8px 14px rgba(45, 24, 32, 0.16));
+  animation: stemFlyIn 620ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes stemFlyIn {
+  0% {
+    opacity: 0;
+    transform: translate3d(-150px, -22px, 0) rotate(-32deg) scale(0.8);
+  }
+  65% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) rotate(0deg) scale(1);
+  }
+}
+
+/* --- Dây thắt tự nhiên giữ eo các cành hoa khi đang ở chế độ xếp cành rời --- */
+.hand-tied-twine {
+  position: absolute;
+  left: 50%;
+  top: 66%;
+  z-index: 39;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  transform: translate3d(-50%, -50%, 0);
+  opacity: 1;
+  transition:
+    opacity 280ms ease,
+    transform 320ms var(--ease-editorial);
+}
+
+.bouquet-composition.is-wrapped .hand-tied-twine {
+  opacity: 0;
+  transform: translate3d(-50%, -50%, 0) scale(0.75);
+}
+
+.twine-band {
+  display: block;
+  width: 44px;
+  height: 10px;
+  border-radius: 4px;
+  background: linear-gradient(180deg, #d7b999 0%, #b8916b 55%, #99724e 100%);
+  box-shadow: 0 3px 6px rgba(45, 24, 32, 0.2);
+}
+
+.twine-knot {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #e2c6a8, #a37c57);
+  box-shadow: 0 2px 4px rgba(45, 24, 32, 0.22);
+}
+
+/* --- LỚP 4: Phễu giấy lụa chữ V & Nơ satin thật trượt mượt từ dưới lên --- */
+.wrap-front-layer {
+  position: absolute;
+  left: 50%;
+  bottom: 2%;
+  width: 50%;
+  height: 56%;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  z-index: 42;
+  pointer-events: none;
+  opacity: 0;
+  transform: translate3d(-50%, 48px, 0) scale(0.92);
+  transform-origin: 50% 100%;
+  transition:
+    opacity 540ms var(--ease-editorial) 80ms,
+    transform 680ms var(--ease-editorial) 80ms;
+}
+
+.bouquet-composition.is-wrapped .wrap-front-layer {
+  opacity: 1;
+  transform: translate3d(-50%, 0, 0) scale(1);
+}
+
+.wrap-front-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  filter: drop-shadow(0 16px 24px rgba(45, 24, 32, 0.2));
+}
+
+.extra-blooms-pill {
+  position: absolute;
+  right: 0.75rem;
+  bottom: 0.75rem;
+  z-index: 45;
+  padding: 0.25rem 0.625rem;
+  border-radius: var(--radius-pill);
+  background-color: var(--surface-card);
+  border: 1px solid var(--border-strong);
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--ink-primary);
+}
+
+/* Trạng thái rỗng (0 cành) tinh giản với vòng tròn chấm mảnh giữa cánh hoa bay */
+.empty-stage-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 45;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.875rem;
+  padding: 1.5rem;
+  text-align: center;
+}
+
+.empty-orbit-ring {
+  width: 96px;
+  height: 96px;
+  border-radius: 50%;
+  border: 1.5px dashed var(--border-strong);
+  background: rgba(255, 255, 255, 0.56);
+}
+
+.empty-stage-prompt {
+  max-width: 24ch;
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 1.0625rem;
+  font-weight: 500;
+  line-height: 1.45;
+  color: var(--ink-secondary);
+  text-wrap: balance;
+}
+
+.stage-footnote {
+  margin-top: 0.75rem;
+  font-size: 0.75rem;
+  line-height: 1.5;
+  text-align: center;
+  color: var(--ink-muted);
+  text-wrap: pretty;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .real-stem-img {
+    animation: none;
+  }
+
+  .wrap-back-layer,
+  .wrap-front-layer,
+  .eucalyptus-sprig,
+  .stem-slot-anchor,
+  .stems-layer,
+  .hand-tied-twine {
+    transition: none;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Cột phải: Chọn giấy gói thủ công & Tóm tắt bó hoa
+   -------------------------------------------------------------------------- */
+.studio-summary-col {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.wrap-radiogroup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.625rem;
+}
+
+.wrap-option-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  width: 100%;
+  min-height: 44px;
+  padding: 0.875rem 1rem;
+  text-align: left;
+  background-color: var(--surface-card);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-md);
+  transition:
+    background-color 160ms ease,
+    border-color 160ms ease,
+    box-shadow 160ms ease;
+}
+
+.wrap-option-card:not(.is-checked):hover {
+  background-color: var(--bg-cream);
+  border-color: var(--ink-secondary);
+}
+
+/* Chuẩn Card chọn evondevKit (choice-controls.md): viền --border-focus + ring 2px --ring-focus */
+.wrap-option-card.is-checked {
+  background-color: var(--surface-card);
+  border-color: var(--border-focus);
+  box-shadow: 0 0 0 2px var(--ring-focus);
+}
+
+.wrap-dual-swatch {
+  position: relative;
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  margin-top: 2px;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--border-strong);
+  overflow: hidden;
+}
+
+.swatch-paper-half {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.swatch-ribbon-dot {
+  position: absolute;
+  right: 3px;
+  bottom: 3px;
+  width: 14px;
+  height: 14px;
+  border-radius: var(--radius-pill);
+  border: 2px solid var(--surface-card);
+}
+
+.wrap-option-content {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.wrap-option-top {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.wrap-option-name {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--ink-primary);
+}
+
+.wrap-option-price {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--gold-accent-ink);
+  flex-shrink: 0;
+}
+
+.wrap-option-desc {
+  font-size: 0.8125rem;
+  line-height: 1.45;
+  color: var(--ink-secondary);
+  text-wrap: pretty;
+}
+
+/* Khối tóm tắt bó hoa: F25 đường chia chạm sát 2 mép không dùng margin âm */
+.summary-card {
+  padding-block: 1rem;
+  background-color: var(--surface-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+}
+
+@media (min-width: 640px) {
+  .summary-card {
+    padding-block: 1.25rem;
+  }
+}
+
+.summary-section-pad {
+  padding-inline: 1rem;
+}
+
+@media (min-width: 640px) {
+  .summary-section-pad {
+    padding-inline: 1.25rem;
+  }
+}
+
+.summary-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.summary-title {
+  font-family: var(--font-serif);
+  font-size: 1.375rem;
+  font-weight: 600;
+  line-height: 1.25;
+  color: var(--ink-primary);
+}
+
+.summary-stem-count {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.625rem;
+  border-radius: var(--radius-pill);
+  background-color: var(--primary-light);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--primary);
+}
+
+.summary-divider {
+  margin-block: 0.875rem;
+  margin-inline: 0;
+  border: 0;
+  border-top: 1px solid var(--border-subtle);
+}
+
+.summary-line-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.625rem;
+}
+
+.summary-line-item {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.75rem;
+  font-size: 0.875rem;
+  line-height: 1.45;
+}
+
+.summary-line-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 0;
+  color: var(--ink-primary);
+}
+
+.summary-color-pip {
+  width: 9px;
+  height: 9px;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--border-strong);
+  flex-shrink: 0;
+}
+
+.summary-line-text {
+  min-width: 0;
+  overflow-wrap: break-word;
+}
+
+.summary-wrap-line .summary-line-label {
+  color: var(--ink-secondary);
+}
+
+.summary-line-amount {
+  font-weight: 500;
+  color: var(--ink-primary);
+  flex-shrink: 0;
+}
+
+.summary-empty-note {
+  padding-block: 0.5rem;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: var(--ink-muted);
+  text-wrap: pretty;
+}
+
+.summary-total-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.summary-total-label {
+  font-size: 0.9375rem;
+  font-weight: 500;
+  color: var(--ink-secondary);
+}
+
+.summary-total-value {
+  font-size: 1.25rem;
+  font-weight: 600;
+  line-height: 1.25;
+  color: var(--ink-primary);
+}
+
+/* Hộp báo lỗi xác thực (tương phản chữ #B91C1C trên #FEF2F2 đạt 6.15:1 > 5.5:1) */
+.builder-error-box {
+  margin-top: 0.875rem;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  padding: 0.75rem 0.875rem;
+  background-color: var(--danger-bg);
+  border: 1px solid var(--danger-border);
+  border-radius: var(--radius-md);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  line-height: 1.45;
+  color: var(--danger);
+}
+
+/* Cụm nút cuối bảng tóm tắt: cao tối thiểu 44px, bo pill đồng bộ CTA, không rớt hàng lẻ (R3) */
+.summary-actions {
+  margin-top: 1rem;
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
+  gap: 0.625rem;
+}
+
+.btn-primary,
+.btn-outline {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-height: 44px;
+  padding: 0.625rem 1rem;
+  border-radius: var(--radius-pill);
+  font-size: 0.875rem;
+  font-weight: 600;
+  line-height: 1.25;
+  text-align: center;
+  overflow-wrap: anywhere;
+  transition:
+    background-color 160ms ease,
+    border-color 160ms ease,
+    color 160ms ease;
+}
+
+.btn-primary {
+  border: 1px solid var(--primary);
+  background-color: var(--primary);
+  color: var(--primary-foreground);
+}
+
+.btn-primary:hover {
+  border-color: var(--primary-hover);
+  background-color: var(--primary-hover);
+}
+
+.btn-outline {
+  border: 1px solid var(--border-strong);
+  background-color: var(--surface-card);
+  color: var(--ink-primary);
+}
+
+.btn-outline:hover {
+  background-color: var(--bg-cream-alt);
+}

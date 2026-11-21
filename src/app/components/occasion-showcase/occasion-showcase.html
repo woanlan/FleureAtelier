@@ -1,0 +1,159 @@
+<!-- Phân khu Chọn hoa theo dịp — Chuyển nền Pastel mượt mà & cánh hoa rơi theo chủ đề -->
+@let occasion = atelier.activeOccasion();
+@let currentBouquet = displayedBouquet();
+
+<section
+  id="theo-dip"
+  class="occasion-section"
+  [style.background-color]="occasion.bgHex"
+  aria-labelledby="occasion-heading"
+>
+  <!-- Lớp cánh hoa rơi tự nhiên đổi bảng màu theo dịp đang xem -->
+  <app-petal-canvas [colors]="occasion.petalColors" [density]="22" />
+
+  <div class="occasion-stage-grid">
+    <!-- 1. Bộ chọn 6 dịp tặng: dải chip cuộn ngang trên Mobile (< 1024px) / menu dọc bên phải trên Desktop -->
+    <div class="occasion-switcher-wrap">
+      <div
+        #chipScroller
+        class="occasion-chip-scroller scrollbar-clean"
+        [class.fade-left]="canScrollChipsLeft()"
+        [class.fade-right]="canScrollChipsRight()"
+      >
+        <div class="occasion-list" role="group" aria-label="Chọn dịp tặng hoa">
+          @for (item of atelier.occasions; track item.id) {
+            @let isSelected = atelier.selectedOccasionId() === item.id;
+            <button
+              #occBtn
+              type="button"
+              class="occasion-btn"
+              [class.is-active]="isSelected"
+              [attr.aria-pressed]="isSelected"
+              (click)="onSelectOccasion(item.id, occBtn)"
+            >
+              <span class="occasion-btn-label">{{ item.label }}</span>
+              @if (isSelected) {
+                <span class="occasion-active-pill">Đang xem</span>
+              }
+            </button>
+          }
+        </div>
+      </div>
+
+      <!-- Nút cuộn ngang hỗ trợ thiết bị dùng chuột ở màn hình < 1024px (luật R10) -->
+      @if (canScrollChipsLeft()) {
+        <div class="chip-scroll-arrow chip-scroll-arrow-left">
+          <button
+            type="button"
+            class="chip-arrow-btn"
+            aria-label="Cuộn danh sách dịp sang trái"
+            (click)="scrollChipsByPage(-1)"
+          >
+            <app-icon name="chevron-left" [size]="16" />
+          </button>
+        </div>
+      }
+      @if (canScrollChipsRight()) {
+        <div class="chip-scroll-arrow chip-scroll-arrow-right">
+          <button
+            type="button"
+            class="chip-arrow-btn"
+            aria-label="Cuộn danh sách dịp sang phải"
+            (click)="scrollChipsByPage(1)"
+          >
+            <app-icon name="chevron-right" [size]="16" />
+          </button>
+        </div>
+      }
+    </div>
+
+    <!-- 2. Tiêu đề tạp chí lớn đặt chính giữa đỉnh sân khấu -->
+    <header class="occasion-header">
+      <h2
+        id="occasion-heading"
+        class="occasion-headline"
+        [style.color]="occasion.headlineHex"
+      >
+        {{ occasion.headline }}
+      </h2>
+    </header>
+
+    <!-- 3. Tâm điểm sân khấu: ảnh bó hoa tách nền PNG & thanh chú thích đặt hoa -->
+    <div class="occasion-center">
+      <figure class="centerpiece-figure">
+        <img
+          [src]="currentBouquet.image"
+          [alt]="'Bó hoa ' + currentBouquet.name + ' dành cho dịp ' + occasion.label"
+          width="896"
+          height="1200"
+          loading="lazy"
+          decoding="async"
+          class="centerpiece-img"
+        />
+      </figure>
+
+      <div class="centerpiece-caption-bar" aria-live="polite">
+        <div class="caption-meta">
+          <h3 class="caption-bouquet-name">{{ currentBouquet.name }}</h3>
+          <span class="caption-bouquet-price tabular-nums">
+            {{ atelier.formatVnd(currentBouquet.basePrice) }}
+          </span>
+        </div>
+
+        <button
+          type="button"
+          class="caption-order-btn"
+          (click)="orderDisplayedBouquet()"
+        >
+          Đặt bó này
+        </button>
+      </div>
+    </div>
+
+    <!-- 4. Khối thơ ca góc dưới bên trái -->
+    <div class="occasion-poetry">
+      <span class="poetry-eyebrow">Chọn theo dịp</span>
+      <p class="poetry-quote">{{ occasion.poeticQuote }}</p>
+      <p class="poetry-sub">{{ occasion.poeticSub }}</p>
+    </div>
+
+    <!-- 5. Bộ 4 thẻ vòm thu nhỏ góc dưới bên phải (2x2 trên Mobile, 1 hàng 4 thẻ trên Desktop) -->
+    <div class="occasion-thumbs-wrap">
+      <div
+        class="occasion-thumbs-grid"
+        role="group"
+        [attr.aria-label]="'Bốn mẫu hoa tuyển chọn cho dịp ' + occasion.label"
+      >
+        @for (bouquet of atelier.occasionBouquets(); track bouquet.id) {
+          @let isThumbActive = currentBouquet.id === bouquet.id;
+          <button
+            type="button"
+            class="occasion-thumb-card"
+            [class.is-active]="isThumbActive"
+            [attr.aria-pressed]="isThumbActive"
+            [attr.aria-label]="
+              'Ngắm mẫu ' + bouquet.name + ' – ' + atelier.formatVnd(bouquet.basePrice)
+            "
+            (click)="onSelectThumbnail(bouquet)"
+          >
+            <span class="thumb-arch-media">
+              <img
+                [src]="bouquet.image"
+                [alt]="'Mẫu thu nhỏ ' + bouquet.name"
+                width="896"
+                height="1200"
+                loading="eager"
+                decoding="async"
+                class="thumb-arch-img"
+              />
+            </span>
+            <span class="thumb-arch-name" [attr.title]="bouquet.name">{{ bouquet.name }}</span>
+            <span class="thumb-arch-price tabular-nums">
+              {{ atelier.formatVnd(bouquet.basePrice) }}
+            </span>
+          </button>
+        }
+      </div>
+    </div>
+  </div>
+</section>

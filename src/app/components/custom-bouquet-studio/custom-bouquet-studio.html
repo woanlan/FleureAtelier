@@ -1,0 +1,403 @@
+<!-- Phân khu Bàn tự phối hoa thủ công — FLEURÉ Flower Boutique (Ảnh cành hoa & giấy gói thật) -->
+<section id="tu-bo-hoa" class="studio-section" aria-labelledby="studio-heading">
+  <div class="atelier-container">
+    <!-- Đầu mục phân khu -->
+    <header class="studio-header">
+      <p class="studio-eyebrow">Bàn phối hoa thủ công FLEURÉ</p>
+      <h2 id="studio-heading" class="studio-heading">Bạn chọn cành, FLEURÉ gói thành thơ.</h2>
+      <p class="studio-subtitle">
+        Chạm thêm từng cành hoa Đà Lạt thật để ngắm hoa tự bay vào bó, rồi chọn giấy lụa Pháp và bấm
+        <strong>Bó hoa</strong> để gói trọn tác phẩm của riêng bạn.
+      </p>
+    </header>
+
+    <!-- Bàn làm việc 3 cột (>= 1080px: 1.15fr | 1.05fr | 0.92fr; < 1080px: xếp chồng không tràn ngang) -->
+    <div class="studio-workbench">
+      <!-- =====================================================================
+           CỘT TRÁI: DANH MỤC 10 LOẠI CÀNH HOA TƯƠI CẮT CÀNH
+           ===================================================================== -->
+      <div class="studio-col studio-catalog-col">
+        <div class="col-head">
+          <span class="col-step-label">1. Chọn cành hoa tươi</span>
+          <span class="col-step-hint">Tối thiểu 3 cành để bó giấy</span>
+        </div>
+
+        <div class="stem-grid" role="list" aria-label="Danh mục hoa cắt cành">
+          @for (stem of atelier.stems; track stem.id) {
+            @let qty = atelier.getStemCount(stem.id);
+            <article
+              role="listitem"
+              class="stem-card"
+              [class.is-selected]="qty > 0"
+            >
+              <!-- Ảnh cận cảnh chính bông hoa đơn thật kèm chấm sắc độ -->
+              <div class="stem-media">
+                <img
+                  [src]="stem.image"
+                  [alt]="stem.name"
+                  width="64"
+                  height="64"
+                  loading="eager"
+                  decoding="async"
+                  class="stem-thumb"
+                />
+                <span
+                  class="stem-swatch-dot"
+                  [style.background-color]="stem.colorHex"
+                  aria-hidden="true"
+                ></span>
+              </div>
+
+              <!-- Nhóm nội dung & bộ đếm số lượng -->
+              <div class="stem-body">
+                <div class="stem-info-group">
+                  <h3 class="stem-name">{{ stem.name }}</h3>
+                  <p class="stem-origin">{{ stem.origin }}</p>
+                  <p class="stem-note">{{ stem.seasonNote }}</p>
+                </div>
+
+                <div class="stem-footer">
+                  <span class="stem-price tabular-nums">
+                    {{ atelier.formatVnd(stem.pricePerStem) }}<span class="stem-unit">/cành</span>
+                  </span>
+
+                  <!-- Bộ tăng giảm số lượng cành chuẩn vùng chạm >= 44x44px -->
+                  <div class="stem-stepper" role="group" [attr.aria-label]="'Số lượng ' + stem.name">
+                    <button
+                      type="button"
+                      class="stepper-btn"
+                      (click)="atelier.decrementStem(stem.id)"
+                      [disabled]="qty === 0"
+                      [attr.aria-label]="'Giảm cành ' + stem.name"
+                    >
+                      <span class="stepper-hit" aria-hidden="true">−</span>
+                    </button>
+                    <span class="stem-qty tabular-nums">{{ qty }}</span>
+                    <button
+                      type="button"
+                      class="stepper-btn"
+                      (click)="atelier.incrementStem(stem.id)"
+                      [disabled]="qty >= maxStemPerVariety"
+                      [attr.aria-label]="'Thêm cành ' + stem.name"
+                    >
+                      <span class="stepper-hit" aria-hidden="true">+</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </article>
+          }
+        </div>
+      </div>
+
+      <!-- =====================================================================
+           CỘT GIỮA: SÂN KHẤU GHÉP CÀNH HOA THẬT & GÓI GIẤY LỤA TRỰC TIẾP
+           ===================================================================== -->
+      <div class="studio-col studio-stage-col">
+        <div class="bouquet-pedestal">
+          <!-- Thanh trạng thái chế độ gói giấy / xếp cành rời & tổng số cành -->
+          <div class="pedestal-topbar">
+            <span class="pedestal-tag">
+              {{ isWrapped() ? wrapDisplayLabel() : 'Đang xếp cành rời' }}
+            </span>
+
+            <div class="pedestal-top-actions">
+              @if (atelier.totalCustomStems() > 0) {
+                <button
+                  type="button"
+                  class="stage-mode-toggle"
+                  (click)="toggleWrapPreview()"
+                >
+                  {{ isWrapped() ? 'Xem cành rời' : 'Bó giấy ngay' }}
+                </button>
+              }
+              <span class="pedestal-count tabular-nums">{{ atelier.totalCustomStems() }} cành</span>
+            </div>
+          </div>
+
+          <div
+            class="stage-canvas-wrap"
+            [class.is-wrapped]="isWrapped()"
+            [class.has-stems]="atelier.totalCustomStems() > 0"
+            role="img"
+            [attr.aria-label]="
+              atelier.totalCustomStems() > 0
+                ? (isWrapped() ? 'Bó hoa đã gói giấy ' + atelier.selectedWrap().name + ' gồm ' : 'Bó cành rời gồm ') +
+                  atelier.customStemsSummary()
+                : 'Sân khấu đang trống chờ chọn cành hoa'
+            "
+          >
+            <!-- Lớp cánh hoa phấn rơi nhẹ phía sau giống video studio -->
+            <app-petal-canvas [colors]="stagePetalColors" [density]="14" />
+
+            <!-- Đĩa sáng mềm tạo chiều sâu bàn studio -->
+            <div class="stage-spotlight-glow" aria-hidden="true"></div>
+
+            <!-- Khung hợp thành 4 lớp ảnh tách nền PNG thật -->
+            <div class="bouquet-composition" [class.is-wrapped]="isWrapped()">
+              <!-- LỚP 1 (BACK): QUẠT GIẤY LỤA PHÍA SAU (chỉ bung nở khi bấm Bó hoa) -->
+              <div class="wrap-back-layer" aria-hidden="true">
+                <img
+                  [src]="atelier.selectedWrap().backImage"
+                  [alt]="'Lớp giấy nền sau ' + atelier.selectedWrap().name"
+                  width="808"
+                  height="920"
+                  loading="eager"
+                  decoding="async"
+                  class="wrap-back-img"
+                />
+              </div>
+
+              <!-- LỚP 2 (GREENERY): NHÀNH LÁ KHUYNH DIỆP BẠC THẬT XÒE HAI BÊN KHI GÓI -->
+              <div class="greenery-layer" aria-hidden="true">
+                <img
+                  [src]="eucalyptusImage"
+                  alt=""
+                  width="425"
+                  height="900"
+                  loading="eager"
+                  decoding="async"
+                  class="eucalyptus-sprig eucalyptus-left"
+                />
+                <img
+                  [src]="eucalyptusImage"
+                  alt=""
+                  width="425"
+                  height="900"
+                  loading="eager"
+                  decoding="async"
+                  class="eucalyptus-sprig eucalyptus-right"
+                />
+              </div>
+
+              <!-- LỚP 3 (REAL FLOWER STEMS): TỪNG CÀNH HOA THẬT BAY TỪ TRÁI VÀO BÓ XOẮN GỐC -->
+              <div class="stems-layer" aria-hidden="true">
+                @for (node of positionedStems(); track node.trackKey) {
+                  <div
+                    class="stem-slot-anchor"
+                    [style.--stem-x.%]="node.offsetX"
+                    [style.--stem-y.%]="node.offsetY + node.tallBoost"
+                    [style.--stem-angle.deg]="node.angleDeg"
+                    [style.--stem-scale]="node.scale"
+                    [style.z-index]="node.zIndex"
+                  >
+                    <img
+                      [src]="node.stem.stemCutoutImage"
+                      [alt]="node.stem.name"
+                      width="420"
+                      height="900"
+                      loading="eager"
+                      decoding="async"
+                      class="real-stem-img"
+                    />
+                  </div>
+                }
+              </div>
+
+              <!-- DÂY BUỘC CÀNH TỰ NHIÊN KHI ĐANG XẾP CÀNH RỜI (giống khung hình trước khi bấm Bó hoa) -->
+              @if (atelier.totalCustomStems() > 0) {
+                <div class="hand-tied-twine" aria-hidden="true">
+                  <span class="twine-band"></span>
+                  <span class="twine-knot"></span>
+                </div>
+              }
+
+              <!-- LỚP 4 (FRONT): PHỄU GIẤY LỤA CHỮ V & NƠ SATIN THẬT TRƯỢT TỪ DƯỚI LÊN BỌC EO BÓ -->
+              <div class="wrap-front-layer" aria-hidden="true">
+                <img
+                  [src]="atelier.selectedWrap().frontImage"
+                  [alt]="'Lớp giấy gói trước và nơ ' + atelier.selectedWrap().name"
+                  width="371"
+                  height="826"
+                  loading="eager"
+                  decoding="async"
+                  class="wrap-front-img"
+                />
+              </div>
+            </div>
+
+            <!-- Nhãn phụ khi bó hoa vượt quá 18 cành hiển thị trên sân khấu -->
+            @if (hiddenBloomCount() > 0) {
+              <p class="extra-blooms-pill tabular-nums">
+                +{{ hiddenBloomCount() }} cành phối lớp trong
+              </p>
+            }
+
+            <!-- Trạng thái rỗng (0 cành): vòng chấm mảnh giữa cánh hoa bay như clip gốc -->
+            @if (atelier.totalCustomStems() === 0) {
+              <div class="empty-stage-overlay">
+                <span class="empty-orbit-ring" aria-hidden="true"></span>
+                <p class="empty-stage-prompt">Chọn cành hoa bên trái để cắm từng bông vào bó</p>
+                <button
+                  type="button"
+                  class="btn-outline empty-restore-btn"
+                  (click)="onRestoreStarter()"
+                >
+                  Thử mẫu gợi ý 5 cành
+                </button>
+              </div>
+            }
+          </div>
+
+          <p class="stage-footnote">
+            Mỗi lần bấm <strong>+</strong> một cành hoa thật sẽ bay vào bó; bấm <strong>Bó hoa</strong> hoặc chọn màu giấy để gói lụa hoàn chỉnh.
+          </p>
+        </div>
+      </div>
+
+      <!-- =====================================================================
+           CỘT PHẢI: CHỌN GIẤY GÓI THỦ CÔNG & BẢNG TÓM TẮT TẠM TÍNH
+           ===================================================================== -->
+      <div class="studio-col studio-summary-col">
+        <!-- Khối chọn 3 dòng giấy gói thủ công (role="radiogroup") -->
+        <div class="wrap-selector-block">
+          <div class="col-head">
+            <span class="col-step-label" id="wrap-radiogroup-label">2. Giấy gói thủ công</span>
+          </div>
+
+          <div
+            class="wrap-radiogroup"
+            role="radiogroup"
+            aria-labelledby="wrap-radiogroup-label"
+          >
+            @for (wrap of atelier.wrapPapers; track wrap.id; let idx = $index) {
+              @let isWrapChecked = atelier.selectedWrapId() === wrap.id;
+              <button
+                #wrapRadioBtn
+                type="button"
+                role="radio"
+                class="wrap-option-card"
+                [class.is-checked]="isWrapChecked"
+                [attr.aria-checked]="isWrapChecked"
+                [attr.tabindex]="isWrapChecked ? 0 : -1"
+                (click)="selectWrapPaper(wrap.id)"
+                (keydown)="onWrapKeydown($event, idx)"
+              >
+                <!-- Vòng mẫu màu kép: nửa giấy gói + nửa ruy băng lụa -->
+                <span class="wrap-dual-swatch" aria-hidden="true">
+                  <span
+                    class="swatch-paper-half"
+                    [style.background-color]="wrap.paperHex"
+                  ></span>
+                  <span
+                    class="swatch-ribbon-dot"
+                    [style.background-color]="wrap.ribbonHex"
+                  ></span>
+                </span>
+
+                <span class="wrap-option-content">
+                  <span class="wrap-option-top">
+                    <span class="wrap-option-name">{{ wrap.name }}</span>
+                    <span class="wrap-option-price tabular-nums">
+                      +{{ atelier.formatVnd(wrap.price) }}
+                    </span>
+                  </span>
+                  <span class="wrap-option-desc">{{ wrap.description }}</span>
+                </span>
+              </button>
+            }
+          </div>
+        </div>
+
+        <!-- Bảng tóm tắt thành phần bó hoa & tổng tạm tính -->
+        <div class="summary-card">
+          <div class="summary-section-pad summary-head">
+            <h3 class="summary-title">Bó của bạn</h3>
+            <span class="summary-stem-count tabular-nums">
+              {{ atelier.totalCustomStems() }} cành
+            </span>
+          </div>
+
+          <hr class="summary-divider" />
+
+          <div class="summary-section-pad summary-body">
+            @if (atelier.selectedStemEntries().length > 0) {
+              <ul class="summary-line-list" aria-label="Chi tiết cành hoa đã chọn">
+                @for (entry of atelier.selectedStemEntries(); track entry.stem.id) {
+                  <li class="summary-line-item">
+                    <span class="summary-line-label">
+                      <span
+                        class="summary-color-pip"
+                        [style.background-color]="entry.stem.colorHex"
+                        aria-hidden="true"
+                      ></span>
+                      <span class="summary-line-text">
+                        <span class="tabular-nums">{{ entry.count }}</span> × {{ entry.stem.name }}
+                      </span>
+                    </span>
+                    <span class="summary-line-amount tabular-nums">
+                      {{ atelier.formatVnd(entry.subtotal) }}
+                    </span>
+                  </li>
+                }
+
+                <!-- Dòng phụ phí giấy gói hiển thị khi đã có ít nhất 1 cành hoa -->
+                <li class="summary-line-item summary-wrap-line">
+                  <span class="summary-line-label">
+                    <span
+                      class="summary-color-pip"
+                      [style.background-color]="atelier.selectedWrap().paperHex"
+                      aria-hidden="true"
+                    ></span>
+                    <span class="summary-line-text">
+                      {{ wrapDisplayLabel() }}
+                    </span>
+                  </span>
+                  <span class="summary-line-amount tabular-nums">
+                    {{ atelier.formatVnd(atelier.selectedWrap().price) }}
+                  </span>
+                </li>
+              </ul>
+            } @else {
+              <p class="summary-empty-note">
+                Chưa có cành hoa nào được chọn. Hãy thêm ít nhất 3 cành hoa từ danh mục bên cạnh.
+              </p>
+            }
+          </div>
+
+          <hr class="summary-divider" />
+
+          <div class="summary-section-pad summary-foot">
+            <div class="summary-total-row">
+              <span class="summary-total-label">Tạm tính</span>
+              <strong class="summary-total-value tabular-nums">
+                {{ atelier.formatVnd(atelier.customBouquetTotal()) }}
+              </strong>
+            </div>
+
+            <!-- Hộp thông báo lỗi xác thực khi bấm đặt/bó dưới 3 cành -->
+            @if (atelier.customBuilderError(); as err) {
+              <div class="builder-error-box" role="alert">
+                <app-icon name="alert-circle" [size]="18" />
+                <span>{{ err }}</span>
+              </div>
+            }
+
+            <!-- Cụm nút hành động: "Bó hoa" khi đang xếp cành rời -> "Đặt bó này" sau khi gói -->
+            <div class="summary-actions">
+              <button
+                type="button"
+                class="btn-primary summary-order-btn"
+                (click)="onPrimaryAction()"
+              >
+                @if (!isWrapped()) {
+                  <app-icon name="sparkles" [size]="16" />
+                  <span>Bó hoa</span>
+                } @else {
+                  <span>Đặt bó này</span>
+                }
+              </button>
+              <button
+                type="button"
+                class="btn-outline summary-reset-btn"
+                (click)="onResetStudio()"
+              >
+                Làm lại
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

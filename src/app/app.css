@@ -1,0 +1,56 @@
+/* ==========================================================================
+   KHUNG VỎ ỨNG DỤNG GỐC — FLEURÉ FLOWER BOUTIQUE
+   Đảm bảo không tràn ngang (375px -> 1920px) & hỗ trợ Skip Link chuẩn WCAG AA
+   ========================================================================== */
+
+:host {
+  display: block;
+  min-height: 100dvh;
+  width: 100%;
+  max-width: 100%;
+  overflow-x: clip;
+  background-color: var(--bg-cream);
+  color: var(--ink-primary);
+}
+
+.atelier-main {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  overflow-x: clip;
+  outline: none;
+}
+
+/* Ẩn Skip Link phía trên khung nhìn bằng translateY âm cho đến khi nhận focus từ bàn phím (luật N11) */
+.skip-link {
+  position: fixed;
+  top: 0.75rem;
+  left: 0.75rem;
+  z-index: 200;
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0.625rem 1.125rem;
+  border-radius: var(--radius-sm);
+  background-color: var(--primary);
+  color: var(--primary-foreground);
+  font-family: var(--font-sans);
+  font-size: 0.875rem;
+  font-weight: 600;
+  box-shadow: var(--elevation-popover);
+  transform: translateY(-200%);
+  opacity: 0;
+  pointer-events: none;
+  transition:
+    transform 180ms var(--ease-editorial),
+    opacity 180ms ease;
+}
+
+.skip-link:focus,
+.skip-link:focus-visible {
+  transform: translateY(0);
+  opacity: 1;
+  pointer-events: auto;
+  outline: 2px solid var(--gold-metallic);
+  outline-offset: 2px;
+}

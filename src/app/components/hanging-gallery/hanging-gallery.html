@@ -1,0 +1,168 @@
+<!-- Phân khu Bộ sưu tập hoa treo trên kệ đồng — Chiều sâu 3D & bảng tên gỗ trầm -->
+<section
+  id="bo-suu-tap"
+  class="hanging-section surface-espresso"
+  data-surface="dark"
+  aria-labelledby="hanging-heading"
+>
+  <div class="atelier-container hanging-container">
+    <!-- Tiêu đề phân khu -->
+    <header class="hanging-header">
+      <p class="hanging-eyebrow">Bộ sưu tập FLEURÉ Signature</p>
+      <h2 id="hanging-heading" class="hanging-heading">Chọn một bó, hoa sẽ bước ra.</h2>
+      <p class="hanging-subtitle">
+        Chạm vào từng bó hoa treo trên kệ hồng kim để ngắm rõ sắc cánh hoa Đà Lạt và lớp giấy lụa Pháp.
+      </p>
+
+      <!-- Trạng thái đồng bộ trực tiếp với Backend Render / MongoDB -->
+      <div class="catalog-sync-pill" role="status" aria-live="polite">
+        @switch (atelier.catalogStatus()) {
+          @case ('loading') {
+            <span class="sync-dot sync-dot--loading" aria-hidden="true"></span>
+            <span>Đang đồng bộ danh mục hoa tươi từ máy chủ FLEURÉ (MongoDB)...</span>
+          }
+          @case ('live') {
+            <span class="sync-dot sync-dot--live" aria-hidden="true"></span>
+            <span>
+              Đồng bộ trực tiếp <strong class="tabular-nums">{{ atelier.catalogCount() }}</strong> mẫu hoa từ hệ thống FLEURÉ (MongoDB)
+            </span>
+          }
+          @default {
+            <span class="sync-dot sync-dot--fallback" aria-hidden="true"></span>
+            <span>Đang hiển thị bộ sưu tập lưu sẵn</span>
+            <button
+              type="button"
+              class="sync-retry-btn"
+              (click)="atelier.loadCatalogFromApi()"
+            >
+              Thử đồng bộ lại
+            </button>
+          }
+        }
+      </div>
+    </header>
+
+    <!-- Sân khấu kệ đồng treo 5 vị trí chiều sâu -->
+    <div class="hanging-stage-shell" (keydown)="onStageKeydown($event)">
+      <div class="hanging-stage">
+        <!-- Thanh đồng ngang chạy dọc sân khấu -->
+        <div class="brass-rod" aria-hidden="true"></div>
+
+        <!-- Danh sách các bó hoa treo thả từ thanh đồng -->
+        <div class="hanging-slots-track">
+          @for (slot of hangingSlots(); track slot.bouquet.id) {
+            <div
+              class="hanging-slot"
+              [attr.data-slot]="slot.slotState"
+              [inert]="!slot.isVisibleDesktop"
+            >
+              <!-- Khoen đồng ôm lấy thanh kệ ngang -->
+              <span class="brass-clasp" aria-hidden="true"></span>
+
+              <!-- Sợi dây đồng mảnh 1px nối từ khoen xuống bó hoa -->
+              <span class="gold-cord" aria-hidden="true"></span>
+
+              <!-- Khối bó hoa có hiệu ứng tiến/lùi chiều sâu & độ mờ -->
+              <button
+                #hangSlotBtn
+                type="button"
+                class="bouquet-hang-btn"
+                [attr.aria-pressed]="slot.offset === 0"
+                [attr.aria-label]="
+                  slot.offset === 0
+                    ? 'Đang ngắm bó hoa ' + slot.bouquet.name
+                    : 'Chọn ngắm bó hoa ' + slot.bouquet.name
+                "
+                (click)="onSelectSlot(slot.index)"
+              >
+                <img
+                  [src]="slot.bouquet.image"
+                  [alt]="'Bó hoa ' + slot.bouquet.name + ' – ' + slot.bouquet.stemsSummary"
+                  width="896"
+                  height="1200"
+                  loading="eager"
+                  decoding="async"
+                  class="bouquet-cutout-img"
+                />
+              </button>
+            </div>
+          }
+        </div>
+      </div>
+
+      <!-- Cụm nút điều hướng Trái / Phải chuẩn vùng chạm 44x44px -->
+      <div class="stage-nav-controls">
+        <button
+          type="button"
+          class="stage-nav-btn stage-nav-prev"
+          aria-label="Bó hoa trước"
+          (click)="atelier.prevHanging()"
+        >
+          <app-icon name="chevron-left" [size]="20" />
+        </button>
+
+        <span class="stage-mobile-counter tabular-nums" aria-live="polite">
+          {{ activePositionLabel() }}
+        </span>
+
+        <button
+          type="button"
+          class="stage-nav-btn stage-nav-next"
+          aria-label="Bó hoa tiếp theo"
+          (click)="atelier.nextHanging()"
+        >
+          <app-icon name="chevron-right" [size]="20" />
+        </button>
+      </div>
+    </div>
+
+    <!-- Bảng thông tin gỗ trầm Espresso bên dưới bó hoa tâm điểm -->
+    @let activeBouquet = atelier.activeHangingBouquet();
+    <article class="bouquet-plaque" aria-live="polite">
+      <div class="plaque-main">
+        @if (activeBouquet.tag) {
+          <span class="plaque-tag">{{ activeBouquet.tag }}</span>
+        }
+        <h3 class="plaque-title">{{ activeBouquet.name }}</h3>
+        <p class="plaque-poetic">{{ activeBouquet.poeticNote }}</p>
+        <p class="plaque-stems">{{ activeBouquet.stemsSummary }}</p>
+      </div>
+
+      <div class="plaque-Divider" aria-hidden="true"></div>
+
+      <div class="plaque-footer">
+        <div class="plaque-price-group">
+          <span class="plaque-price-label">Giá niêm yết</span>
+          <span class="plaque-price-line">
+            <span class="plaque-price-value tabular-nums">
+              {{ atelier.formatVnd(activeBouquet.basePrice) }}
+            </span>
+            @if (activeBouquet.oldPriceValue && activeBouquet.oldPriceValue > activeBouquet.basePrice) {
+              <span class="plaque-old-price tabular-nums">
+                {{ atelier.formatVnd(activeBouquet.oldPriceValue) }}
+              </span>
+            }
+          </span>
+        </div>
+
+        <button type="button" class="plaque-cta-btn" (click)="orderActiveBouquet()">
+          Đặt bó này
+        </button>
+      </div>
+    </article>
+
+    <!-- Hàng chỉ báo dạng viên nang (vùng chạm >= 44x44px qua ::before theo luật N9 & N11) -->
+    <div class="hanging-dots-row" role="group" aria-label="Chọn nhanh bó hoa trong bộ sưu tập">
+      @for (bouquet of atelier.hangingBouquets(); track bouquet.id; let idx = $index) {
+        <button
+          type="button"
+          class="hanging-dot-btn"
+          [class.is-active]="atelier.activeHangingIndex() === idx"
+          [attr.aria-pressed]="atelier.activeHangingIndex() === idx"
+          [attr.aria-label]="'Xem bó số ' + (idx + 1) + ': ' + bouquet.name"
+          (click)="atelier.selectHanging(idx)"
+        ></button>
+      }
+    </div>
+  </div>
+</section>

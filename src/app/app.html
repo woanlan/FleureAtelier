@@ -1,0 +1,27 @@
+<!-- Khóa tương tác toàn bộ nền trang bằng [inert] khi ngăn kéo đặt hoa mở -->
+<div
+  class="atelier-page-shell"
+  [inert]="atelier.drawerOpen()"
+  [attr.inert]="atelier.drawerOpen() ? '' : null"
+>
+  <!-- Liên kết bỏ qua điều hướng hỗ trợ người dùng bàn phím & trình đọc màn hình -->
+  <a class="skip-link" href="#main-content">Chuyển tới nội dung chính</a>
+
+  <!-- Thanh điều hướng FLEURÉ — Flower Boutique -->
+  <app-atelier-header />
+
+  <!-- Dòng chảy 5 phân khu trải nghiệm nghệ thuật hoa -->
+  <main id="main-content" class="atelier-main" tabindex="-1">
+    <app-hero-atelier />
+    <app-hanging-gallery />
+    <app-occasion-showcase />
+    <app-custom-bouquet-studio />
+    <app-seasonal-calendar />
+  </main>
+
+  <!-- Chân trang thông tin xưởng & liên hệ -->
+  <app-atelier-footer />
+</div>
+
+<!-- Ngăn kéo đặt hoa kem ấm & Sân khấu thiệp gấp 3D trực tiếp -->
+<app-order-drawer />

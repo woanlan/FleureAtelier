@@ -1,0 +1,319 @@
+/* ==========================================================================
+   FLEURÉ — FLOWER BOUTIQUE | HỆ THỐNG DESIGN TOKENS & QUY CHUẨN TOÀN CỤC
+   Nhận diện: Hồng Pastel (#FFF5F7) & Đỏ Ruby Rượu Vang (#9D2547 / #240B13)
+   Tuân thủ: WCAG 2.1 AA/AAA (>= 6.1:1), evondevKit I18 Scrollbar, Zero Overflow
+   ========================================================================== */
+
+:root {
+  color-scheme: light;
+
+  /* 1. Cặp phông chữ thương hiệu (Hỗ trợ đầy đủ bộ dấu tiếng Việt) */
+  --font-serif: 'Playfair Display', Georgia, 'Times New Roman', serif;
+  --font-sans: 'Be Vietnam Pro', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+
+  /* 2. Bề mặt Hồng Pastel sáng dịu (FLEURÉ Pastel Pink Surfaces) */
+  --bg-cream: #FFF5F7;
+  --bg-cream-alt: #FCE7EC;
+  --surface-card: #FFFFFF;
+  --surface-elevated: #FFF9FA;
+
+  /* Aliases ngữ nghĩa FLEURÉ cho bề mặt sáng */
+  --bg-blush: var(--bg-cream);
+  --bg-blush-alt: var(--bg-cream-alt);
+
+  /* 3. Bề mặt Rượu vang Ruby đậm (Hero, Phòng trưng bày hoa treo & Chân trang) */
+  --bg-espresso: #240B13;
+  --bg-espresso-soft: #31101A;
+  --bg-espresso-card: #3D1623;
+  --text-on-dark: #FDF4F6;               /* > 16:1 trên #240B13 */
+  --text-on-dark-muted: #E2C8D0;         /* > 11:1 trên #240B13 */
+  --gold-metallic: #F2B8C6;              /* Hồng Phấn Champagne trên nền Ruby đậm (chữ #240B13 đạt 10.1:1) */
+  --gold-metallic-hover: #F7CAD5;        /* 11.6:1 */
+  --gold-line: rgba(242, 184, 198, 0.34);
+  --gold-glow: rgba(242, 184, 198, 0.16);
+
+  /* Aliases ngữ nghĩa FLEURÉ cho bề mặt tối Ruby */
+  --bg-ruby-deep: var(--bg-espresso);
+  --bg-ruby-soft: var(--bg-espresso-soft);
+  --bg-ruby-card: var(--bg-espresso-card);
+  --rose-champagne: var(--gold-metallic);
+  --rose-champagne-hover: var(--gold-metallic-hover);
+  --rose-champagne-line: var(--gold-line);
+  --rose-champagne-glow: var(--gold-glow);
+
+  /* 4. Mực chữ Ruby & Màu nhấn hành động độ tương phản cao (WCAG AA/AAA) */
+  --ink-primary: #2D1820;                /* 14.5:1 trên #FFF5F7 */
+  --ink-secondary: #5E3E49;              /* 7.4:1 trên #FFF5F7 */
+  --ink-muted: #6A4B56;                  /* 6.1:1 trên #FFF5F7 */
+  --text-title: #5A1428;                 /* 11.1:1 trên #FFF5F7 */
+  --foreground: var(--ink-primary);
+
+  --primary: #9D2547;                    /* FLEURÉ Đỏ Ruby gốc: 7.05:1 với #FFFFFF */
+  --primary-hover: #831B38;
+  --primary-foreground: #FFFFFF;
+  --primary-light: #FCE7EC;
+  --gold-accent-ink: #8E2040;            /* Đỏ Ruby cổ cho eyebrow và giá trên nền sáng: 7.7:1 */
+
+  /* Aliases ngữ nghĩa FLEURÉ cho màu nhấn */
+  --ruby-primary: var(--primary);
+  --ruby-hover: var(--primary-hover);
+  --ruby-accent-ink: var(--gold-accent-ink);
+
+  /* 5. Đường viền & Trạng thái Focus bàn phím */
+  --border-subtle: #F0D5DD;
+  --border-strong: #D9B0BD;
+  --border-focus: #9D2547;
+  --ring-focus: rgba(157, 37, 71, 0.22);
+  --ring-focus-dark: rgba(242, 184, 198, 0.42);
+
+  /* 6. Trạng thái ngữ nghĩa (Lỗi xác thực & Đặt hàng thành công) */
+  --danger: #B91C1C;
+  --danger-bg: #FEF2F2;
+  --danger-border: #FECACA;
+  --success: #15803D;
+  --success-bg: #F0FDF4;
+  --success-border: #BBF7D0;
+
+  /* 7. Nhịp bố cục, Bo góc & Bóng lớp nổi (chỉ áp cho Popover / Drawer) */
+  --container-max: 1240px;
+  --gutter-inline: clamp(1rem, 4vw, 2.5rem);
+  --section-py: clamp(4rem, 7vw, 6.5rem);
+
+  --radius-xs: 6px;
+  --radius-sm: 10px;
+  --radius-md: 14px;
+  --radius-lg: 20px;
+  --radius-pill: 9999px;
+
+  --elevation-popover: 0 12px 28px -6px rgba(36, 11, 19, 0.16), 0 4px 10px -4px rgba(36, 11, 19, 0.08);
+  --elevation-drawer: -16px 0 48px -8px rgba(36, 11, 19, 0.36);
+  --backdrop-scrim: rgba(36, 11, 19, 0.62);
+
+  /* 8. Nhịp chuyển động tự nhiên */
+  --ease-editorial: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* Vùng giao diện tối Rượu vang Ruby (Hero / Hanging Gallery / Footer) tự đảo màu thanh cuộn & focus */
+.surface-espresso,
+.surface-ruby,
+[data-surface='dark'] {
+  --foreground: var(--text-on-dark);
+}
+
+/* ==========================================================================
+   RESET TOÀN CỤC & CAM KẾT KHÔNG TRÀN NGANG (375px -> 1920px)
+   ========================================================================== */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  overflow-x: clip;
+  max-width: 100%;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-sans);
+  font-size: 1rem;
+  line-height: 1.6;
+  color: var(--ink-primary);
+  background-color: var(--bg-cream);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: clip;
+  max-width: 100%;
+}
+
+h1,
+h2,
+h3,
+h4,
+p,
+figure,
+blockquote {
+  margin: 0;
+}
+
+h1,
+h2,
+h3,
+.font-serif {
+  font-family: var(--font-serif);
+}
+
+.font-sans {
+  font-family: var(--font-sans);
+}
+
+img,
+svg,
+video,
+canvas {
+  display: block;
+  max-width: 100%;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+  color: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+/* Ngăn Safari / Mobile tự động phóng to khung nhìn khi chạm vào ô nhập (< 16px) */
+@media (max-width: 767.98px) {
+  input,
+  select,
+  textarea {
+    font-size: max(16px, 1rem);
+  }
+}
+
+/* ==========================================================================
+   TIỆN ÍCH CHỮ SỐ CỐ ĐỊNH BỀ RỘNG & HỖ TRỢ TIẾP CẬN (A11Y)
+   ========================================================================== */
+
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+}
+
+.atelier-container {
+  width: 100%;
+  max-width: var(--container-max);
+  margin-inline: auto;
+  padding-inline: var(--gutter-inline);
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Hiển thị rõ khung focus khi điều hướng bằng bàn phím (Tab) */
+:focus-visible {
+  outline: 2px solid var(--border-focus);
+  outline-offset: 2px;
+}
+
+.surface-espresso :focus-visible,
+.surface-ruby :focus-visible,
+[data-surface='dark'] :focus-visible {
+  outline-color: var(--gold-metallic);
+}
+
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: none;
+  border-color: var(--border-focus);
+  box-shadow: 0 0 0 3px var(--ring-focus);
+}
+
+::selection {
+  background-color: var(--primary-light);
+  color: var(--ink-primary);
+}
+
+/* ==========================================================================
+   THANH CUỘN MẢNH 4PX TỰ ẨN (QUY CHUẨN EVONDEVKIT I18)
+   Giữ nguyên bề rộng cố định để không làm giật bố cục khi hiện thanh cuộn
+   ========================================================================== */
+
+* {
+  --scrollbar-thumb: transparent;
+}
+
+*:hover {
+  --scrollbar-thumb: color-mix(in srgb, var(--foreground) 18%, transparent);
+}
+
+.is-scrolling {
+  --scrollbar-thumb: color-mix(in srgb, var(--foreground) 30%, transparent);
+}
+
+::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb);
+  border-radius: var(--radius-pill);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: color-mix(in srgb, var(--foreground) 42%, transparent);
+}
+
+@supports not selector(::-webkit-scrollbar) {
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: transparent transparent;
+  }
+
+  *:hover {
+    scrollbar-color: color-mix(in srgb, var(--foreground) 20%, transparent) transparent;
+  }
+
+  .is-scrolling {
+    scrollbar-color: color-mix(in srgb, var(--foreground) 30%, transparent) transparent;
+  }
+}
+
+/* Dành riêng cho dải tab / chip cuộn ngang */
+.scrollbar-clean {
+  scrollbar-width: none;
+}
+
+.scrollbar-clean::-webkit-scrollbar {
+  display: none;
+}
+
+/* ==========================================================================
+   TÔN TRỌNG NGƯỜI DÙNG GIẢM CHUYỂN ĐỘNG (PREFERS-REDUCED-MOTION)
+   ========================================================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

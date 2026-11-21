@@ -1,0 +1,126 @@
+<!-- Phân khu Mùa hoa Đà Lạt tại FLEURÉ Sài Gòn — 6 mùa hoa & hiệu ứng mở màn Mosaic 6x8 -->
+<section id="lich-hoa" class="seasonal-section" aria-labelledby="seasonal-heading">
+  <div class="atelier-container">
+    <!-- Đầu mục phân khu -->
+    <header class="seasonal-header">
+      <p class="seasonal-eyebrow">Hoa tươi cao nguyên · Giao Sài Gòn mỗi sáng</p>
+      <h2 id="seasonal-heading" class="seasonal-heading">Mùa hoa Đà Lạt tại FLEURÉ.</h2>
+      <p class="seasonal-subtitle">
+        Sáu thức hoa cắt cành sương sớm từ Đà Lạt và Bảo Lộc, cập bến 45 Nguyễn Huệ mỗi sáng để giữ trọn hương sắc tinh khôi.
+      </p>
+    </header>
+
+    <!-- =======================================================================
+         KHUNG TÂM ĐIỂM MÙA HOA ĐANG CHỌN + HIỆU ỨNG LƯỚI MOSAIC 6×8 (48 Ô)
+         ======================================================================= -->
+    @let current = activeSeason();
+    @let suggestedBouquet = linkedBouquet();
+    <div class="seasonal-spotlight" aria-live="polite">
+      <!-- Cột ảnh vòm thực vật học (border-radius: 220px 220px 20px 20px) -->
+      <div class="spotlight-frame-wrap">
+        <figure class="spotlight-arch-frame">
+          <img
+            [src]="current.image"
+            [alt]="current.name + ', ' + current.monthLabel"
+            width="480"
+            height="600"
+            loading="eager"
+            decoding="sync"
+            class="spotlight-photo"
+          />
+
+          <!-- Lưới 6x8 (48 ô) phủ trên ảnh để mở màn chéo từ góc trái trên xuống góc phải dưới -->
+          <div
+            class="mosaic-overlay"
+            [class.is-revealing]="isMosaicTransitioning()"
+            [class.wave-alt]="mosaicWaveToggle()"
+            aria-hidden="true"
+          >
+            @for (tile of mosaicTiles; track tile.id) {
+              <span
+                class="mosaic-tile"
+                [class.tile-warm]="tile.isWarmTint"
+                [style.animation-delay.ms]="tile.delayMs"
+              ></span>
+            }
+          </div>
+        </figure>
+      </div>
+
+      <!-- Cột thông tin thức hoa, hương thơm, độ bền cắm bình & nút đặt mẫu mùa này -->
+      <div class="spotlight-details">
+        <span class="season-month-pill">{{ current.monthLabel }}</span>
+
+        <h3 class="spotlight-flower-name">{{ current.name }}</h3>
+
+        <p class="spotlight-poetic-note">{{ current.poeticNote }}</p>
+
+        <!-- Thông số thực vật học của mùa hoa -->
+        <dl class="spotlight-meta-list">
+          <div class="meta-row">
+            <dt class="meta-term">
+              <app-icon name="sparkles" [size]="16" />
+              <span>Hương thơm:</span>
+            </dt>
+            <dd class="meta-desc">{{ current.scentLevel }}</dd>
+          </div>
+
+          <div class="meta-row">
+            <dt class="meta-term">
+              <app-icon name="droplets" [size]="16" />
+              <span>Độ bền:</span>
+            </dt>
+            <dd class="meta-desc">{{ current.vaseLife }}</dd>
+          </div>
+        </dl>
+
+        <div class="spotlight-cta-group">
+          <button
+            type="button"
+            class="season-order-btn"
+            (click)="orderCurrentSeasonBouquet()"
+          >
+            Đặt mẫu hoa mùa này
+          </button>
+
+          <p class="linked-bouquet-hint">
+            Gợi ý phối sẵn: <strong>{{ suggestedBouquet.name }}</strong>&nbsp;<span class="tabular-nums">({{ atelier.formatVnd(suggestedBouquet.basePrice) }})</span>
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- =======================================================================
+         DẢI 6 THẺ VÒM CHỌN MÙA HOA (6 cột >=1200px | 3 cột >=768px | 2 cột mobile)
+         ======================================================================= -->
+    <div class="season-selector-grid" role="group" aria-label="Chọn mùa hoa trong năm">
+      @for (season of atelier.seasonalFlowers; track season.id; let i = $index) {
+        @let isSelected = activeSeasonIndex() === i;
+        <button
+          type="button"
+          class="season-arch-card"
+          [class.is-active]="isSelected"
+          [attr.aria-pressed]="isSelected"
+          (click)="selectSeason(i)"
+        >
+          <span class="mini-arch-thumb-wrap">
+            <img
+              [src]="season.image"
+              [alt]="season.name"
+              width="180"
+              height="220"
+              loading="eager"
+              decoding="async"
+              class="mini-arch-thumb"
+            />
+          </span>
+
+          <span class="season-card-caption">
+            <span class="season-card-month">{{ season.monthLabel }}</span>
+            <span class="season-card-title">{{ season.name }}</span>
+          </span>
+        </button>
+      }
+    </div>
+  </div>
+</section>

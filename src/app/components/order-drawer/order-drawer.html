@@ -1,0 +1,743 @@
+<!-- =========================================================================
+     KHUÔN MẪU DÙNG CHUNG: THIỆP GẤP 3D THỦ CÔNG FLEURÉ (DESKTOP & MOBILE)
+     ========================================================================= -->
+<ng-template #greetingCardArtwork>
+  <div class="greeting-card-paper">
+    <!-- Đường gấp gáy thiệp thủ công bên trái -->
+    <span class="greeting-card-spine" aria-hidden="true"></span>
+
+    <!-- Khung chỉ vàng mảnh dập chìm chuẩn giấy cotton mỹ thuật -->
+    <div class="greeting-card-inner">
+      <!-- Họa tiết cành thảo mộc ép khô trang trí góc trên phải -->
+      <svg
+        class="botanical-corner botanical-corner--top"
+        viewBox="0 0 64 64"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+        aria-hidden="true"
+      >
+        <path
+          d="M54 10C40 16 26 28 16 48"
+          stroke="currentColor"
+          stroke-width="1.1"
+          stroke-linecap="round"
+        />
+        <path
+          d="M42 17C35 14 29 16 26 22C33 23 39 21 42 17Z"
+          stroke="currentColor"
+          stroke-width="1"
+        />
+        <path
+          d="M46 25C51 22 55 24 56 30C49 31 45 29 46 25Z"
+          stroke="currentColor"
+          stroke-width="1"
+        />
+        <path
+          d="M31 28C24 26 19 29 17 35C24 36 29 33 31 28Z"
+          stroke="currentColor"
+          stroke-width="1"
+        />
+        <path
+          d="M34 37C40 35 44 38 45 43C38 44 34 41 34 37Z"
+          stroke="currentColor"
+          stroke-width="1"
+        />
+      </svg>
+
+      <!-- Biểu trưng Monogram F · FLEURÉ dập nổi ở đỉnh thiệp -->
+      <div class="greeting-monogram-header">
+        <span class="greeting-monogram-seal" aria-hidden="true">F</span>
+        <span class="greeting-atelier-caption">FLEURÉ · Saigon</span>
+      </div>
+
+      <!-- Dòng chữ viết tay nghiêng Playfair Display cập nhật trực tiếp -->
+      <blockquote class="greeting-live-quote">
+        “{{ previewCardMessage() }}”
+      </blockquote>
+
+      <!-- Dòng chữ ký người nhận & hoa đi kèm ở chân thiệp -->
+      <div class="greeting-card-footer">
+        <p class="greeting-recipient-line">
+          Thân gửi: <strong class="greeting-recipient-name">{{ previewRecipientName() }}</strong>
+        </p>
+        <p class="greeting-bouquet-seal">
+          {{ atelier.activeOrderBouquet().name }}
+        </p>
+      </div>
+
+      <!-- Nhành lá nhỏ đối xứng góc dưới phải -->
+      <svg
+        class="botanical-corner botanical-corner--bottom"
+        viewBox="0 0 48 48"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+        aria-hidden="true"
+      >
+        <path
+          d="M10 38C22 35 32 26 38 12"
+          stroke="currentColor"
+          stroke-width="1.1"
+          stroke-linecap="round"
+        />
+        <circle cx="38" cy="12" r="2" fill="currentColor" />
+        <circle cx="27" cy="24" r="1.6" fill="currentColor" />
+      </svg>
+    </div>
+  </div>
+</ng-template>
+
+<!-- =========================================================================
+     KHUNG PHỦ TOÀN MÀN HÌNH: GIỮ TRONG DOM ĐỂ CHẠY HIỆU ỨNG TRƯỢT MƯỢT
+     ========================================================================= -->
+<div
+  class="order-overlay"
+  [class.is-open]="atelier.drawerOpen()"
+  [attr.aria-hidden]="!atelier.drawerOpen()"
+  [inert]="!atelier.drawerOpen()"
+>
+  <!-- Lớp nền tối mờ tách biệt (anh em với panel để không nhân đôi opacity) -->
+  <div class="order-backdrop" (click)="onBackdropClick()" aria-hidden="true"></div>
+
+  <!-- Sân khấu nổi bên trái hiển thị Thiệp 3D tương tác (Desktop >= 1024px) -->
+  <div
+    class="greeting-stage-desktop"
+    aria-hidden="true"
+    (mousemove)="onStageMouseMove($event)"
+    (mouseleave)="resetCardTilt()"
+    (click)="onBackdropClick()"
+  >
+    <div class="greeting-stage-badge">
+      <app-icon name="sparkles" [size]="15" />
+      <span>Xem trước thiệp viết tay gấp 3D · Rê chuột để nghiêng thiệp</span>
+    </div>
+
+    <div
+      class="greeting-card-3d"
+      [style.transform]="card3dTransform()"
+      (click)="$event.stopPropagation()"
+    >
+      <ng-container [ngTemplateOutlet]="greetingCardArtwork" />
+    </div>
+
+    @if (hasUnsavedRecipientInput()) {
+      <p class="stage-dismiss-hint">
+        Đang lưu nháp người nhận · Nhấn ✕ hoặc phím Esc để đóng
+      </p>
+    }
+  </div>
+
+  <!-- Ngăn kéo đặt hoa kem ấm bên phải -->
+  <aside
+    #drawerPanel
+    class="order-drawer-panel"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="drawer-title"
+    tabindex="-1"
+    (keydown)="onDrawerKeydown($event)"
+  >
+    <!-- 1. Tầng Header cố định -->
+    <header class="drawer-header">
+      <div class="drawer-header-titles">
+        <p class="drawer-eyebrow">Flower Boutique · Quận 1, TP.HCM</p>
+        <h2 id="drawer-title" class="drawer-title">Đặt hoa · FLEURÉ</h2>
+      </div>
+
+      <button
+        type="button"
+        class="drawer-close-btn"
+        (click)="atelier.closeDrawer()"
+        aria-label="Đóng ngăn kéo đặt hoa"
+      >
+        <app-icon name="x" [size]="20" />
+      </button>
+    </header>
+
+    <!-- 2. Tầng Thân cuộn dọc -->
+    <div #drawerBody class="drawer-body">
+      @if (atelier.confirmedOrder(); as order) {
+        <!-- ===============================================================
+             TRẠNG THÁI VỪA HOÀN TẤT ĐƠN HÀNG (O3 JUST-COMPLETED STATE)
+             =============================================================== -->
+        <section class="confirmed-card" aria-live="polite">
+          <div class="confirmed-badge" [class.is-offline]="!order.persistedToDb">
+            <app-icon [name]="order.persistedToDb ? 'check' : 'info'" [size]="16" [strokeWidth]="2.25" />
+            <span>
+              {{ order.persistedToDb ? 'Đã lưu MongoDB' : 'Phiếu tạm Zalo' }}
+              <strong class="confirmed-code tabular-nums">#{{ order.orderCode }}</strong>
+            </span>
+          </div>
+
+          <p class="confirmed-intro">
+            @if (order.persistedToDb) {
+              Đơn đặt hoa đã được ghi nhận trực tiếp trên hệ thống FLEURÉ (MongoDB · trạng thái:
+              <strong>{{ order.orderStatus }}</strong>). Gửi thêm mã đơn qua Zalo FLEURÉ (0909 123 456)
+              nếu bạn muốn nhận ảnh hoa thực tế trước khi giao hỏa tốc 60 phút.
+            } @else {
+              Phiếu đặt hoa tạm đã sẵn sàng. Gửi nội dung phiếu qua Zalo FLEURÉ (0909 123 456) để
+              tiệm xác nhận và giao hỏa tốc 60 phút.
+            }
+          </p>
+
+          <dl class="confirmed-summary-list">
+            <div class="confirmed-row">
+              <dt>Mẫu hoa</dt>
+              <dd>
+                {{ order.bouquetName }}
+                @if (order.source === 'collection') {
+                  <span class="confirmed-sub-meta">(Cỡ {{ order.size }})</span>
+                } @else if (order.size !== 'Nhỏ') {
+                  <span class="confirmed-sub-meta">(Nâng cấp cỡ {{ order.size }})</span>
+                }
+              </dd>
+            </div>
+
+            <div class="confirmed-row">
+              <dt>Thành phần</dt>
+              <dd>{{ order.stemsSummary }}</dd>
+            </div>
+
+            @if (order.addonNames.length > 0) {
+              <div class="confirmed-row">
+                <dt>Quà tặng kèm</dt>
+                <dd>{{ order.addonNames.join(', ') }}</dd>
+              </div>
+            }
+
+            <div class="confirmed-row">
+              <dt>Khung giờ giao</dt>
+              <dd class="tabular-nums">
+                {{
+                  order.deliveryDay === 'Chọn ngày'
+                    ? 'Ngày ' + order.customDate
+                    : order.deliveryDay
+                }}
+                · {{ order.timeSlot }}
+              </dd>
+            </div>
+
+            <div class="confirmed-row">
+              <dt>Người nhận</dt>
+              <dd class="tabular-nums">{{ order.recipientName }} · {{ order.recipientPhone }}</dd>
+            </div>
+
+            <div class="confirmed-row">
+              <dt>Địa chỉ giao</dt>
+              <dd>{{ order.recipientAddress }}</dd>
+            </div>
+
+            <div class="confirmed-row">
+              <dt>Lời chúc thiệp</dt>
+              <dd class="confirmed-quote">“{{ order.cardMessage }}”</dd>
+            </div>
+
+            @if (order.voucherCode && order.discountAmount > 0) {
+              <div class="confirmed-row">
+                <dt>Mã ưu đãi ({{ order.voucherCode }})</dt>
+                <dd class="confirmed-discount tabular-nums">
+                  −{{ atelier.formatVnd(order.discountAmount) }}
+                </dd>
+              </div>
+            }
+
+            <div class="confirmed-row">
+              <dt>Giao hỏa tốc 60p TP.HCM</dt>
+              <dd class="tabular-nums">
+                {{ order.shippingFee === 0 ? 'Miễn phí' : atelier.formatVnd(order.shippingFee) }}
+              </dd>
+            </div>
+
+            <div class="confirmed-row confirmed-row--total">
+              <dt>Tổng thanh toán</dt>
+              <dd class="confirmed-total-price tabular-nums">
+                {{ atelier.formatVnd(order.totalPrice) }}
+              </dd>
+            </div>
+          </dl>
+
+          @if (order.persistedToDb && order.hasAtelierExtras && order.dbGrandTotal !== undefined) {
+            <p class="confirmed-db-note tabular-nums">
+              Đơn gốc đã ghi trên MongoDB: <strong>{{ atelier.formatVnd(order.dbGrandTotal) }}</strong>.
+              Chi tiết nâng cấp cỡ, quà kèm hoặc cành tự phối đã lưu kèm ghi chú để nghệ nhân xác nhận.
+            </p>
+          }
+
+          @if (copiedToast()) {
+            <div class="copied-toast-banner" role="status">
+              <app-icon name="check" [size]="18" [strokeWidth]="2.2" />
+              <p>
+                Đã sao chép nội dung đơn, bạn hãy dán vào Zalo FLEURÉ (0909 123 456).
+              </p>
+            </div>
+          }
+
+          <div class="confirmed-actions">
+            <button
+              type="button"
+              class="btn-confirmed btn-confirmed-primary"
+              (click)="copyAndOpenZalo(order)"
+            >
+              <app-icon name="send" [size]="17" />
+              <span>Sao chép &amp; Mở Zalo gửi tiệm</span>
+            </button>
+
+            <button
+              type="button"
+              class="btn-confirmed btn-confirmed-outline"
+              (click)="copyOrderTextOnly(order)"
+            >
+              <app-icon name="copy" [size]="17" />
+              <span>Chỉ sao chép mã &amp; nội dung đơn</span>
+            </button>
+
+            <button
+              type="button"
+              class="btn-confirmed btn-confirmed-ghost"
+              (click)="onOrderAnotherBouquet()"
+            >
+              <app-icon name="rotate-ccw" [size]="16" />
+              <span>Đặt thêm bó hoa khác</span>
+            </button>
+          </div>
+
+          <!-- Bảng đối soát nhanh các đơn đặt hoa mới nhất từ MongoDB -->
+          <div class="recent-orders-box">
+            <button
+              type="button"
+              class="recent-orders-toggle"
+              [attr.aria-expanded]="showRecentOrders()"
+              (click)="toggleRecentOrders()"
+            >
+              <span>Kiểm tra đơn gần nhất trên MongoDB</span>
+              <app-icon
+                [name]="showRecentOrders() ? 'chevron-left' : 'chevron-right'"
+                [size]="16"
+              />
+            </button>
+
+            @if (showRecentOrders()) {
+              <div class="recent-orders-panel" aria-live="polite">
+                @if (atelier.loadingRecentOrders()) {
+                  <p class="recent-orders-empty">Đang tải danh sách đơn từ MongoDB...</p>
+                } @else if (atelier.recentOrders().length === 0) {
+                  <p class="recent-orders-empty">Chưa có đơn hàng nào được ghi nhận trên hệ thống.</p>
+                } @else {
+                  <ul class="recent-orders-list">
+                    @for (item of atelier.recentOrders(); track item.orderCode) {
+                      <li class="recent-order-row">
+                        <div class="recent-order-main">
+                          <strong class="confirmed-code tabular-nums">#{{ item.orderCode }}</strong>
+                          <span class="recent-order-customer">
+                            {{ item.customer.fullName }} · {{ atelier.maskPhoneNumber(item.customer.phone) }}
+                          </span>
+                        </div>
+                        <div class="recent-order-meta">
+                          <span class="recent-order-total tabular-nums">
+                            {{ atelier.formatVnd(item.grandTotal) }}
+                          </span>
+                          <span class="recent-order-status">{{ item.status }}</span>
+                        </div>
+                      </li>
+                    }
+                  </ul>
+                }
+              </div>
+            }
+          </div>
+        </section>
+      } @else {
+        <!-- ===============================================================
+             BIỂU MẪU CẤU HÌNH ĐƠN ĐẶT HOA TRỰC TIẾP
+             =============================================================== -->
+        @let bouquet = atelier.activeOrderBouquet();
+
+        <!-- Tóm tắt bó hoa đang chọn -->
+        <section class="selected-bouquet-card" aria-label="Bó hoa đang chọn">
+          <img
+            [src]="bouquet.image"
+            [alt]="bouquet.name"
+            width="68"
+            height="84"
+            class="selected-bouquet-thumb"
+          />
+          <div class="selected-bouquet-info">
+            @if (bouquet.tag) {
+              <span class="selected-bouquet-tag">{{ bouquet.tag }}</span>
+            }
+            <h3 class="selected-bouquet-name">{{ bouquet.name }}</h3>
+            <p class="selected-bouquet-stems">
+              {{
+                atelier.drawerOrderSource() === 'custom'
+                  ? atelier.customStemsSummary()
+                  : bouquet.stemsSummary
+              }}
+            </p>
+            <p class="selected-bouquet-base tabular-nums">
+              Giá tiêu chuẩn:
+              <strong>
+                {{
+                  atelier.formatVnd(
+                    atelier.drawerOrderSource() === 'custom'
+                      ? atelier.customBouquetTotal()
+                      : bouquet.basePrice
+                  )
+                }}
+              </strong>
+            </p>
+          </div>
+        </section>
+
+        <!-- 1. Kích cỡ bó hoa -->
+        <section class="config-section" aria-labelledby="size-section-heading">
+          <h3 id="size-section-heading" class="config-section-title">1. Kích cỡ bó hoa</h3>
+          <div class="size-options-grid" role="group" aria-labelledby="size-section-heading">
+            @for (opt of atelier.sizeOptions; track opt.size) {
+              @let isSelected = atelier.selectedSize() === opt.size;
+              <button
+                type="button"
+                class="choice-ctrl choice-size-card"
+                [class.is-selected]="isSelected"
+                [attr.aria-pressed]="isSelected"
+                (click)="selectSize(opt.size)"
+              >
+                <span class="choice-size-top">
+                  <span class="choice-size-name">{{ opt.size }}</span>
+                  <span class="choice-size-delta tabular-nums">
+                    {{
+                      opt.deltaPrice === 0
+                        ? 'Giá gốc'
+                        : '+' + atelier.formatVnd(opt.deltaPrice)
+                    }}
+                  </span>
+                </span>
+                <span class="choice-size-hint">
+                  {{
+                    atelier.drawerOrderSource() === 'custom' && opt.size === 'Nhỏ'
+                      ? 'Giữ nguyên ' + atelier.totalCustomStems() + ' cành đã chọn'
+                      : opt.stemsHint
+                  }}
+                </span>
+              </button>
+            }
+          </div>
+        </section>
+
+        <!-- 2. Quà tặng kèm -->
+        <section class="config-section" aria-labelledby="addon-section-heading">
+          <h3 id="addon-section-heading" class="config-section-title">
+            2. Quà tặng kèm tinh tế
+          </h3>
+          <div class="addon-options-grid" role="group" aria-labelledby="addon-section-heading">
+            @for (addon of atelier.addons; track addon.id) {
+              @let selected = atelier.isAddonSelected(addon.id);
+              <button
+                type="button"
+                class="choice-ctrl choice-addon-pill"
+                [class.is-selected]="selected"
+                [attr.aria-pressed]="selected"
+                (click)="atelier.toggleAddon(addon.id)"
+              >
+                <span class="choice-addon-check" aria-hidden="true">
+                  @if (selected) {
+                    <app-icon name="check" [size]="13" [strokeWidth]="2.5" />
+                  }
+                </span>
+                <span class="choice-addon-body">
+                  <span class="choice-addon-name">{{ addon.name }}</span>
+                  <span class="choice-addon-price tabular-nums">
+                    +{{ atelier.formatVnd(addon.price) }}
+                  </span>
+                </span>
+              </button>
+            }
+          </div>
+        </section>
+
+        <!-- 3. Ngày & Giờ giao hoa (100% custom pills/chips, không dùng native select/date) -->
+        <section class="config-section" aria-labelledby="schedule-section-heading">
+          <h3 id="schedule-section-heading" class="config-section-title">
+            3. Ngày &amp; Khung giờ giao hoa
+          </h3>
+
+          <div class="day-pills-row" role="group" aria-label="Chọn ngày giao hoa">
+            @for (day of atelier.deliveryDayOptions; track day) {
+              @let activeDay = atelier.deliveryDay() === day;
+              <button
+                type="button"
+                class="choice-ctrl choice-day-pill"
+                [class.is-selected]="activeDay"
+                [attr.aria-pressed]="activeDay"
+                (click)="selectDeliveryDay(day)"
+              >
+                {{ day }}
+              </button>
+            }
+          </div>
+
+          @if (atelier.deliveryDay() === 'Chọn ngày') {
+            <div class="upcoming-dates-panel" role="group" aria-label="Lịch 7 ngày sắp tới">
+              <p class="upcoming-dates-caption">Chọn ngày giao trong 7 ngày tới:</p>
+              <div class="upcoming-dates-grid">
+                @for (chip of upcomingDateChips; track chip.isoKey) {
+                  @let activeChip = atelier.customDeliveryDate() === chip.label;
+                  <button
+                    type="button"
+                    class="choice-ctrl choice-date-chip tabular-nums"
+                    [class.is-selected]="activeChip"
+                    [attr.aria-pressed]="activeChip"
+                    (click)="selectCustomDate(chip.label)"
+                  >
+                    {{ chip.label }}
+                  </button>
+                }
+              </div>
+            </div>
+          }
+
+          <p class="sub-field-caption">Khung giờ giao nội thành TP.HCM:</p>
+          <div class="timeslot-grid" role="group" aria-label="Chọn khung giờ giao hoa">
+            @for (slot of atelier.timeSlots; track slot) {
+              @let activeSlot = atelier.selectedTimeSlot() === slot;
+              <button
+                type="button"
+                class="choice-ctrl choice-timeslot-pill tabular-nums"
+                [class.is-selected]="activeSlot"
+                [attr.aria-pressed]="activeSlot"
+                (click)="selectTimeSlot(slot)"
+              >
+                <app-icon name="clock" [size]="15" />
+                <span>{{ slot }}</span>
+              </button>
+            }
+          </div>
+        </section>
+
+        <!-- 4. Mã ưu đãi FLEURÉ (FLEURE20, YEUHOA15, FREESHIP60) -->
+        <section class="config-section" aria-labelledby="voucher-section-heading">
+          <h3 id="voucher-section-heading" class="config-section-title">
+            4. Mã ưu đãi FLEURÉ
+          </h3>
+
+          <div class="voucher-input-row">
+            <label for="voucher-code-input" class="sr-only">Nhập mã ưu đãi FLEURÉ</label>
+            <input
+              id="voucher-code-input"
+              type="text"
+              name="voucherCode"
+              autocomplete="off"
+              placeholder="Nhập FLEURE20, YEUHOA15..."
+              class="field-input voucher-input"
+              [value]="atelier.voucherInput()"
+              (input)="onVoucherInput($event)"
+              (keydown.enter)="onApplyVoucher(); $event.preventDefault()"
+            />
+            <button
+              type="button"
+              class="voucher-apply-btn"
+              (click)="onApplyVoucher()"
+            >
+              Áp dụng
+            </button>
+          </div>
+
+          <div class="voucher-quick-chips" role="group" aria-label="Chọn nhanh mã ưu đãi FLEURÉ">
+            @for (v of atelier.vouchers; track v.code) {
+              @let isApplied = atelier.appliedVoucherCode() === v.code;
+              <button
+                type="button"
+                class="choice-ctrl voucher-quick-pill"
+                [class.is-selected]="isApplied"
+                [attr.aria-pressed]="isApplied"
+                (click)="isApplied ? onClearVoucher() : onApplyVoucher(v.code)"
+              >
+                <app-icon name="ticket" [size]="14" />
+                <span class="voucher-pill-code">{{ v.code }}</span>
+                <span class="voucher-pill-desc">{{ v.label }}</span>
+              </button>
+            }
+          </div>
+
+          @if (atelier.voucherFeedback(); as fb) {
+            <div
+              class="voucher-feedback-banner"
+              [class.is-success]="fb.status === 'success'"
+              [class.is-error]="fb.status === 'error'"
+              [attr.role]="fb.status === 'error' ? 'alert' : 'status'"
+            >
+              <app-icon [name]="fb.status === 'success' ? 'check' : 'alert-circle'" [size]="16" />
+              <span>{{ fb.text }}</span>
+            </div>
+          }
+        </section>
+
+        <!-- 5. Lời nhắn trên thiệp viết tay 3D -->
+        <section class="config-section" aria-labelledby="greeting-section-heading">
+          <h3 id="greeting-section-heading" class="config-section-title">
+            5. Lời nhắn trên thiệp gấp 3D
+          </h3>
+
+          <div class="field-header-row">
+            <label for="card-message-input" class="field-label">
+              Lời nhắn trên thiệp (tùy chọn)
+            </label>
+            <span
+              class="char-counter tabular-nums"
+              [class.is-over]="isMessageOverLimit()"
+            >
+              {{ atelier.cardMessage().length }}/140
+            </span>
+          </div>
+
+          <textarea
+            id="card-message-input"
+            name="cardMessage"
+            rows="3"
+            class="field-textarea"
+            placeholder="Viết đôi lời chân thành để nghệ nhân chép tay lên thiệp..."
+            [value]="atelier.cardMessage()"
+            (input)="onCardMessageInput($event)"
+          ></textarea>
+
+          <div class="suggestion-chips-wrap" role="group" aria-label="Gợi ý câu chúc nhanh">
+            @for (suggestion of atelier.greetingSuggestions; track suggestion) {
+              <button
+                type="button"
+                class="suggestion-chip"
+                [class.is-selected]="atelier.cardMessage() === suggestion"
+                (click)="applyGreetingSuggestion(suggestion)"
+              >
+                {{ suggestion }}
+              </button>
+            }
+          </div>
+
+          <!-- Bản xem trước Thiệp FLEURÉ ngay trong thân cuộn cho Mobile/Tablet (< 1024px) -->
+          <div class="greeting-preview-inline" role="group" aria-label="Xem trước thiệp viết tay">
+            <p class="inline-preview-caption">
+              <app-icon name="sparkles" [size]="14" />
+              <span>Xem trước thiệp giấy mỹ thuật FLEURÉ</span>
+            </p>
+            <ng-container [ngTemplateOutlet]="greetingCardArtwork" />
+          </div>
+        </section>
+
+        <!-- 6. Thông tin người nhận -->
+        <section class="config-section config-section--last" aria-labelledby="recipient-heading">
+          <h3 id="recipient-heading" class="config-section-title">6. Thông tin người nhận</h3>
+
+          <div class="recipient-fields">
+            <div class="field-group">
+              <label for="recipient-name-input" class="field-label">
+                Tên người nhận <span class="required-mark" aria-hidden="true">*</span>
+              </label>
+              <input
+                id="recipient-name-input"
+                type="text"
+                name="recipientName"
+                autocomplete="name"
+                required
+                placeholder="Ví dụ: Nguyễn Minh Thư"
+                class="field-input"
+                [value]="atelier.recipientName()"
+                (input)="onRecipientNameInput($event)"
+              />
+            </div>
+
+            <div class="field-group">
+              <label for="recipient-phone-input" class="field-label">
+                Số điện thoại nhận hoa <span class="required-mark" aria-hidden="true">*</span>
+              </label>
+              <input
+                id="recipient-phone-input"
+                type="tel"
+                inputmode="tel"
+                name="recipientPhone"
+                autocomplete="tel"
+                required
+                placeholder="Ví dụ: 0909 123 456"
+                class="field-input tabular-nums"
+                [value]="atelier.recipientPhone()"
+                (input)="onRecipientPhoneInput($event)"
+              />
+            </div>
+
+            <div class="field-group">
+              <label for="recipient-address-input" class="field-label">
+                Địa chỉ giao hoa <span class="required-mark" aria-hidden="true">*</span>
+              </label>
+              <input
+                id="recipient-address-input"
+                type="text"
+                name="recipientAddress"
+                autocomplete="street-address"
+                required
+                placeholder="Ví dụ: 45 Nguyễn Huệ, P. Bến Nghé, Quận 1, TP.HCM"
+                class="field-input"
+                [value]="atelier.recipientAddress()"
+                (input)="onRecipientAddressInput($event)"
+              />
+            </div>
+          </div>
+        </section>
+      }
+    </div>
+
+    <!-- Cảnh báo xác thực biểu mẫu hoặc lỗi kết nối API nằm sát trên Footer cố định (O6) -->
+    @if (!atelier.confirmedOrder() && atelier.drawerValidationError(); as err) {
+      <div class="drawer-validation-alert" role="alert">
+        <app-icon name="alert-circle" [size]="18" />
+        <p>{{ err }}</p>
+      </div>
+    } @else if (!atelier.confirmedOrder() && atelier.submitOrderError(); as apiErr) {
+      <div class="drawer-validation-alert drawer-api-alert" role="alert">
+        <app-icon name="alert-circle" [size]="18" />
+        <div class="drawer-api-alert-body">
+          <p>{{ apiErr }}</p>
+          <button
+            type="button"
+            class="offline-fallback-btn"
+            (click)="onSubmitOfflineFallback()"
+          >
+            Tạo phiếu Zalo tạm (không lưu máy chủ)
+          </button>
+        </div>
+      </div>
+    } @else if (!atelier.confirmedOrder() && atelier.slowServerNotice()) {
+      <div class="drawer-slow-notice" role="status">
+        <app-icon name="clock" [size]="16" />
+        <p>Máy chủ Render đang khởi động để lưu đơn vào MongoDB, bạn chờ vài giây nhé...</p>
+      </div>
+    }
+
+    <!-- 3. Tầng Footer cố định dính đáy (chỉ hiện khi đang cấu hình đơn) -->
+    @if (!atelier.confirmedOrder()) {
+      <footer class="drawer-footer">
+        <div class="drawer-total-block">
+          <span class="drawer-total-label">
+            @if (atelier.voucherDiscount() > 0) {
+              Đã giảm {{ atelier.formatVnd(atelier.voucherDiscount()) }} ·
+            }
+            {{
+              atelier.shippingFee() === 0
+                ? 'Miễn phí giao 60p'
+                : 'Ship 60p +' + atelier.formatVnd(atelier.shippingFee())
+            }}
+          </span>
+          <strong class="drawer-total-amount tabular-nums">
+            {{ atelier.formatVnd(atelier.drawerTotalPrice()) }}
+          </strong>
+        </div>
+
+        <button
+          type="button"
+          class="submit-zalo-btn"
+          [disabled]="atelier.submittingOrder()"
+          [attr.aria-busy]="atelier.submittingOrder()"
+          (click)="onSubmitOrder()"
+        >
+          {{ atelier.submittingOrder() ? 'Đang lưu đơn...' : 'Đặt hoa ngay' }}
+        </button>
+      </footer>
+    }
+  </aside>
+</div>

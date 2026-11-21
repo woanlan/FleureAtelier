@@ -1,0 +1,52 @@
+<!-- Phân khu Hero mở đầu FLEURÉ — Nền Rượu vang Ruby đậm & Thẻ H1 duy nhất trên toàn trang -->
+<section id="top" class="hero-atelier surface-espresso" data-surface="dark">
+  <!-- Lớp nền nhiếp ảnh hoa hồng Ruby & Hồng Pastel kèm lớp phủ chuyển sắc bảo toàn tương phản > 11:1 -->
+  <div class="hero-media" aria-hidden="true">
+    <img
+      src="/images/hero-fleure-ruby.png"
+      alt="Đóa hồng nhung Ruby và hồng phấn pastel bung nở trong ánh sáng trầm ấm tại FLEURÉ Flower Boutique"
+      width="1376"
+      height="768"
+      fetchpriority="high"
+      decoding="async"
+      class="hero-bg-image"
+    />
+    <div class="hero-scrim"></div>
+  </div>
+
+  <!-- Hiệu ứng cánh hoa hồng phấn rơi chậm phía sau lớp chữ -->
+  <app-petal-canvas [colors]="heroPetalColors" [density]="14" />
+
+  <!-- Nội dung biên tập chính căn trái theo nhịp tạp chí nghệ thuật -->
+  <div class="atelier-container hero-inner">
+    <div class="hero-copy">
+      <p class="hero-eyebrow">Flower Boutique · TP. Hồ Chí Minh</p>
+
+      <!-- Thẻ H1 DUY NHẤT trên toàn bộ trang -->
+      <h1 class="hero-title">FLEURÉ</h1>
+
+      <p class="hero-lead">
+        Gói chút hoa, gửi chút thương. Từng bó hồng pastel và tulip Đà Lạt cắt cành sáng sớm, gói
+        lụa chuẩn Pháp và giao hỏa tốc 60 phút nội thành Sài Gòn.
+      </p>
+
+      <div class="hero-actions">
+        <button
+          type="button"
+          class="hero-btn-primary"
+          (click)="scrollToSection('bo-suu-tap')"
+        >
+          Khám phá bộ sưu tập
+        </button>
+
+        <button
+          type="button"
+          class="hero-btn-outline"
+          (click)="scrollToSection('tu-bo-hoa')"
+        >
+          Tự phối bó hoa
+        </button>
+      </div>
+    </div>
+  </div>
+</section>

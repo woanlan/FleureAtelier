@@ -1,0 +1,93 @@
+<!-- Chân trang FLEURÉ — Flower Boutique (Nền Rượu vang Ruby đậm tương phản cao > 11:1) -->
+<footer id="xuong-hoa" class="atelier-footer surface-espresso" data-surface="dark">
+  <div class="atelier-container">
+    <!-- =======================================================================
+         DẢI CAM KẾT CHẾ TÁC TRÊN CÙNG (FLEURÉ FLOWER BOUTIQUE)
+         ======================================================================= -->
+    <div class="craft-strip">
+      <div class="craft-intro">
+        <p class="footer-eyebrow">Về FLEURÉ Sài Gòn</p>
+        <h2 class="footer-heading">Gói chút hoa, gửi chút thương giữa lòng Quận 1</h2>
+      </div>
+
+      <!-- 3 cam kết nghề hoa: đi thẳng từ 1 cột lên 3 cột (>= 900px) theo R3 để không rớt lẻ 1 mục -->
+      <ul class="craft-commitments" aria-label="Cam kết chế tác của FLEURÉ">
+        @for (item of craftCommitments; track item.id) {
+          <li class="craft-item">
+            <span class="craft-icon-box" aria-hidden="true">
+              <app-icon [name]="item.icon" [size]="20" />
+            </span>
+            <div class="craft-copy">
+              <h3 class="craft-title">{{ item.title }}</h3>
+              <p class="craft-detail">{{ item.detail }}</p>
+            </div>
+          </li>
+        }
+      </ul>
+    </div>
+
+    <!-- =======================================================================
+         CÁC CỘT THÔNG TIN CỬA HÀNG, LIÊN HỆ & ĐIỀU HƯỚNG NHANH
+         ======================================================================= -->
+    <div class="footer-directory">
+      <!-- Cột 1: Nhận diện thương hiệu & Nút mở bàn đặt hoa -->
+      <div class="footer-col footer-brand-col">
+        <p class="brand-wordmark">FLEURÉ</p>
+        <p class="brand-tagline">
+          Tiệm hoa tươi nghệ thuật phong cách Minimalist Pháp tại Quận 1, nơi mỗi bó hồng pastel Đà
+          Lạt được gói tay tỉ mỉ kèm ưu đãi FLEURE20 và giao hỏa tốc trong 60 phút.
+        </p>
+        <button
+          type="button"
+          class="footer-cta-btn"
+          (click)="openOrderWorkbench()"
+        >
+          Đặt hoa hỏa tốc 60p
+        </button>
+      </div>
+
+      <!-- Cột 2: Địa chỉ tiệm, giờ mở cửa & Hotline / Zalo -->
+      <div class="footer-col footer-contact-col">
+        <h3 class="footer-col-title">Liên hệ FLEURÉ</h3>
+        <ul class="contact-list">
+          <li class="contact-row">
+            <app-icon name="map-pin" [size]="18" />
+            <span>45 Nguyễn Huệ, Quận 1, TP. Hồ Chí Minh</span>
+          </li>
+          <li class="contact-row">
+            <app-icon name="clock" [size]="18" />
+            <span class="tabular-nums">07:30 – 21:00 mỗi ngày</span>
+          </li>
+          <li class="contact-row contact-row-action">
+            <a href="tel:0909123456" class="contact-phone-link tabular-nums">
+              <app-icon name="phone" [size]="18" />
+              <span>0909 123 456 <span class="zalo-note">(Hotline / Zalo)</span></span>
+            </a>
+          </li>
+        </ul>
+      </div>
+
+      <!-- Cột 3: Liên kết neo điều hướng nhanh -->
+      <nav class="footer-col footer-nav-col" aria-label="Điều hướng nhanh cuối trang">
+        <h3 class="footer-col-title">Khám phá</h3>
+        <ul class="footer-nav-list">
+          @for (link of quickLinks; track link.href) {
+            <li>
+              <a [href]="link.href" class="footer-nav-link" (click)="scrollToSection($event, link.href)">
+                <span>{{ link.label }}</span>
+                <app-icon name="arrow-up-right" [size]="15" />
+              </a>
+            </li>
+          }
+        </ul>
+      </nav>
+    </div>
+
+    <!-- Dòng bản quyền cuối chân trang -->
+    <div class="footer-bottom">
+      <p class="copyright-text">
+        © 2026 FLEURÉ — Flower Boutique. Tinh hoa hoa tươi nghệ thuật · 45 Nguyễn Huệ, Quận 1, TP.HCM.
+      </p>
+    </div>
+  </div>
+</footer>

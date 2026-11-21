@@ -1,0 +1,302 @@
+/* ==========================================================================
+   CHÂN TRANG FLEURÉ — FLOWER BOUTIQUE (DARK RUBY WINE SURFACE)
+   Tuân thủ evondevKit: tương phản > 11:1, R3 (1 -> 3 cột), vùng chạm >= 44px
+   ========================================================================== */
+
+:host {
+  display: block;
+}
+
+.atelier-footer {
+  scroll-margin-top: 5rem;
+  background-color: var(--bg-espresso);
+  color: var(--text-on-dark);
+  padding-top: clamp(3.5rem, 6vw, 5.5rem);
+  padding-bottom: 2.25rem;
+  border-top: 1px solid var(--gold-line);
+}
+
+/* --------------------------------------------------------------------------
+   Dải cam kết chế tác phía trên (FLEURÉ Sài Gòn)
+   -------------------------------------------------------------------------- */
+.craft-strip {
+  padding-bottom: clamp(2.5rem, 5vw, 3.75rem);
+  border-bottom: 1px solid var(--gold-line);
+}
+
+.craft-intro {
+  max-width: 40rem;
+  margin-bottom: 1.75rem;
+}
+
+.footer-eyebrow {
+  font-family: var(--font-sans);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--gold-metallic);
+  margin-bottom: 0.5rem;
+}
+
+.footer-heading {
+  font-family: var(--font-serif);
+  font-size: clamp(1.875rem, 3.4vw, 2.5rem);
+  font-weight: 600;
+  line-height: 1.18;
+  color: var(--text-on-dark);
+  text-wrap: balance;
+}
+
+/* F3 + F26 + R3: Gom 3 cam kết vào 1 khung duy nhất chia đường mảnh, đi thẳng từ 1 cột -> 3 cột */
+.craft-commitments {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  background-color: var(--bg-espresso-soft);
+  border: 1px solid var(--gold-line);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+@media (min-width: 900px) {
+  .craft-commitments {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+.craft-item {
+  min-width: 0;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.875rem;
+  padding: 1.25rem;
+}
+
+.craft-item + .craft-item {
+  border-top: 1px solid var(--gold-line);
+}
+
+@media (min-width: 900px) {
+  .craft-item {
+    padding: 1.5rem;
+  }
+
+  .craft-item + .craft-item {
+    border-top: 0;
+    border-left: 1px solid var(--gold-line);
+  }
+}
+
+.craft-icon-box {
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-sm);
+  background-color: var(--bg-espresso-card);
+  border: 1px solid var(--gold-line);
+  color: var(--gold-metallic);
+}
+
+.craft-copy {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.craft-title {
+  font-family: var(--font-sans);
+  font-size: 1rem;
+  font-weight: 600;
+  line-height: 1.35;
+  color: var(--text-on-dark);
+  text-wrap: balance;
+}
+
+.craft-detail {
+  font-size: 0.875rem;
+  line-height: 1.55;
+  color: var(--text-on-dark-muted);
+  text-wrap: pretty;
+}
+
+/* --------------------------------------------------------------------------
+   Khối danh bạ xưởng, liên hệ & liên kết điều hướng nhanh
+   -------------------------------------------------------------------------- */
+.footer-directory {
+  padding-block: clamp(2.5rem, 5vw, 3.5rem);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 2.25rem;
+}
+
+@media (min-width: 900px) {
+  .footer-directory {
+    grid-template-columns: minmax(0, 1.35fr) minmax(0, 1.15fr) minmax(0, 0.8fr);
+    gap: 2.5rem;
+  }
+}
+
+.footer-col {
+  min-width: 0;
+}
+
+.brand-wordmark {
+  font-family: var(--font-serif);
+  font-size: 1.875rem;
+  font-weight: 600;
+  line-height: 1.15;
+  letter-spacing: 0.02em;
+  color: var(--text-on-dark);
+}
+
+.brand-tagline {
+  margin-top: 0.75rem;
+  font-size: 0.9375rem;
+  line-height: 1.65;
+  color: var(--text-on-dark-muted);
+  max-width: 44ch;
+  text-wrap: pretty;
+}
+
+/* Nút mở bàn đặt hoa trên nền tối: chữ #171311 trên #D4AF7A đạt tương phản 8.8:1 */
+.footer-cta-btn {
+  margin-top: 1.25rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: 0.6875rem 1.375rem;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--gold-metallic);
+  background-color: var(--gold-metallic);
+  color: var(--bg-espresso);
+  font-size: 0.9375rem;
+  font-weight: 600;
+  line-height: 1.25;
+  transition:
+    background-color 160ms ease,
+    border-color 160ms ease;
+}
+
+.footer-cta-btn:hover {
+  background-color: var(--gold-metallic-hover);
+  border-color: var(--gold-metallic-hover);
+}
+
+.footer-col-title {
+  font-family: var(--font-sans);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--gold-metallic);
+  margin-bottom: 1rem;
+}
+
+.contact-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.875rem;
+}
+
+.contact-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.625rem;
+  font-size: 0.9375rem;
+  line-height: 1.5;
+  color: var(--text-on-dark);
+}
+
+.contact-row app-icon {
+  margin-top: 2px;
+  color: var(--gold-metallic);
+}
+
+.contact-row-action {
+  align-items: center;
+}
+
+.contact-phone-link {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.625rem;
+  min-height: 44px;
+  font-weight: 600;
+  color: var(--text-on-dark);
+  text-underline-offset: 4px;
+  cursor: pointer;
+}
+
+.contact-phone-link app-icon {
+  margin-top: 0;
+  color: var(--gold-metallic);
+}
+
+.contact-phone-link:hover {
+  color: var(--gold-metallic);
+  text-decoration: underline;
+}
+
+.zalo-note {
+  font-size: 0.8125rem;
+  font-weight: 400;
+  color: var(--text-on-dark-muted);
+}
+
+.footer-nav-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+/* I29: Toàn bộ hàng liên kết là vùng bấm 44px trên mobile, con trỏ pointer xuyên suốt */
+.footer-nav-link {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  width: 100%;
+  min-height: 44px;
+  padding: 0.5rem 0.75rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.9375rem;
+  font-weight: 500;
+  color: var(--text-on-dark-muted);
+  cursor: pointer;
+  transition:
+    background-color 150ms ease,
+    color 150ms ease;
+}
+
+.footer-nav-link:hover {
+  background-color: var(--bg-espresso-card);
+  color: var(--text-on-dark);
+}
+
+/* --------------------------------------------------------------------------
+   Dòng bản quyền cuối chân trang
+   -------------------------------------------------------------------------- */
+.footer-bottom {
+  padding-top: 1.5rem;
+  border-top: 1px solid rgba(242, 184, 198, 0.22);
+}
+
+.copyright-text {
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  color: var(--text-on-dark-muted);
+}
