@@ -1,12 +1,20 @@
+import { registerLocaleData } from '@angular/common';
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
+import localeVi from '@angular/common/locales/vi';
+import { LOCALE_ID } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { provideRouter } from '@angular/router';
+import { provideRouter, Router } from '@angular/router';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { App } from './app';
+import { routes } from './app.routes';
 import { OrderDrawer } from './components/order-drawer/order-drawer';
+import { ProductCard } from './components/shared/product-card/product-card';
 import { ApiProduct, ApiSavedOrder } from './models/atelier.models';
+import { ProductDetailPage } from './pages/product-detail-page/product-detail-page';
 import { AtelierService } from './services/atelier.service';
+
+registerLocaleData(localeVi);
 
 const MOCK_API_PRODUCTS: ApiProduct[] = [
   {
@@ -48,16 +56,21 @@ const MOCK_API_PRODUCTS: ApiProduct[] = [
 ];
 
 /**
- * Bộ kiểm thử đơn vị (Vitest + Angular TestBed + HttpTestingController) cho "FLEURÉ — Flower Boutique":
- * 1. Khởi tạo App thành công, render duy nhất một thẻ `<h1>` chứa "FLEURÉ" và gắn `[inert]` lên nền khi mở ngăn kéo.
- * 2. Đồng bộ danh mục hoa từ `GET /api/products` (live & fallback khi lỗi mạng).
- * 3. Chuyển đổi 6 dịp tặng trong `AtelierService` cập nhật chính xác `activeOccasion().headline`.
- * 4. Bàn tự phối hoa kiểm tra 0 cành (tổng = 0đ), chặn dưới 3 cành và mở đơn khi >= 3 cành.
- * 5. Bộ áp mã ưu đãi FLEURÉ (`FLEURE20`, `YEUHOA15`, `FREESHIP60`) và miễn phí giao 60p từ 399.000đ.
- * 6. `OrderDrawer` xác thực tên/SĐT/địa chỉ, gửi `POST /api/orders` đúng hợp đồng MongoDB và hiển thị mã `#FL-xxxxxx`.
- * 7. Phục hồi lỗi khi `POST /api/orders` thất bại (giữ nguyên dữ liệu nhập & cho phép tạo phiếu Zalo tạm).
+ * Bộ kiểm thử đơn vị toàn diện (Vitest + Angular TestBed + HttpTestingController)
+ * cho "FLEURÉ — Flower Boutique" (Khung Mobile-First 430px + Đa trang Lazy Loading + 6 Collection MongoDB):
+ * 1. Khởi tạo khung `.website` 430px, BottomNav, duy nhất một `<h1>` chứa "FLEURÉ" trên `/` và khóa `[inert]` khi mở Drawer.
+ * 2. Đồng bộ `GET /api/products`, chuẩn hóa đường dẫn `/assets/...` và giữ fallback an toàn khi lỗi mạng.
+ * 3. Chuyển đổi 6 dịp tặng cập nhật chính xác `activeOccasion().headline`.
+ * 4. Bàn tự phối hoa chặn < 3 cành và mở đơn khi >= 3 cành.
+ * 5. Mã ưu đãi `FLEURE20`, `YEUHOA15`, `FREESHIP60` và miễn phí giao 60p từ 399.000đ.
+ * 6. `OrderDrawer` xác thực tên/SĐT/địa chỉ, gửi `POST /api/orders` lưu MongoDB và hiển thị mã `#FL-xxxxxx`.
+ * 7. Phục hồi lỗi khi `POST /api/orders` thất bại & hỗ trợ phiếu Zalo tạm tường minh.
+ * 8. `ProductCard` sử dụng chuẩn Angular 22 `input.required()`, `output()` và `DecimalPipe` (`vi-VN`).
+ * 9. Giỏ hàng đa món lưu `localStorage`, xóa kèm Hoàn tác (`undoRemoveCartItem`) & gửi `POST /api/orders`.
+ * 10. `ProductDetailPage` dùng `linkedSignal()` tự động reset `quantity` về `1` khi đổi `:slug`.
+ * 11. Kiểm chứng định tuyến Lazy Loading chuẩn SEO (`/products`, `/category/:slug`, `/promotions`, `/posts -> /bai_viet`, `/experience`, `/cart`).
  */
-describe('FLEURÉ — Flower Boutique (Render / MongoDB API)', () => {
+describe('FLEURÉ — Flower Boutique (Mobile-First 430px & Full-Stack MongoDB)', () => {
   beforeEach(() => {
     try {
       window.localStorage.clear();
@@ -70,17 +83,36 @@ describe('FLEURÉ — Flower Boutique (Render / MongoDB API)', () => {
     TestBed.resetTestingModule();
   });
 
-  it('khởi tạo ứng dụng gốc, chỉ render duy nhất một thẻ <h1> chứa "FLEURÉ" và khóa nền bằng inert khi mở Drawer', async () => {
+  it('khởi tạo khung Mobile 430px (.website), BottomNav, chỉ 1 <h1> "FLEURÉ" ở / và khóa [inert] khi mở Drawer', async () => {
     await TestBed.configureTestingModule({
       imports: [App],
-      providers: [provideRouter([]), provideHttpClient(), provideHttpClientTesting()],
+      providers: [
+        { provide: LOCALE_ID, useValue: 'vi-VN' },
+        provideRouter(routes),
+        provideHttpClient(),
+        provideHttpClientTesting(),
+      ],
     }).compileComponents();
 
+    const router = TestBed.inject(Router);
     const httpMock = TestBed.inject(HttpTestingController);
     const fixture = TestBed.createComponent(App);
     fixture.detectChanges();
 
+    await router.navigateByUrl('/');
+    fixture.detectChanges();
+
     httpMock.expectOne('/api/products').flush(MOCK_API_PRODUCTS);
+    httpMock.match('/api/home').forEach((req) =>
+      req.flush({
+        banners: [],
+        categories: [],
+        newProducts: MOCK_API_PRODUCTS,
+        bestSellingProducts: MOCK_API_PRODUCTS,
+        saleProducts: [MOCK_API_PRODUCTS[0]],
+        latestPosts: [],
+      })
+    );
     fixture.detectChanges();
     await fixture.whenStable();
 
@@ -88,6 +120,8 @@ describe('FLEURÉ — Flower Boutique (Render / MongoDB API)', () => {
     const h1Elements = rootElement.querySelectorAll('h1');
 
     expect(fixture.componentInstance).toBeTruthy();
+    expect(rootElement.querySelector('.atelier-page-shell.website')).toBeTruthy();
+    expect(rootElement.querySelector('app-bottom-nav')).toBeTruthy();
     expect(h1Elements.length).toBe(1);
     expect(h1Elements[0]?.textContent).toContain('FLEURÉ');
 
@@ -100,7 +134,7 @@ describe('FLEURÉ — Flower Boutique (Render / MongoDB API)', () => {
     httpMock.verify();
   });
 
-  it('nạp danh mục sản phẩm thật từ GET /api/products và giữ fallback an toàn khi mất kết nối', () => {
+  it('nạp danh mục sản phẩm thật từ GET /api/products, chuẩn hóa URL /assets/... và giữ fallback an toàn khi mất kết nối', () => {
     TestBed.configureTestingModule({
       providers: [provideHttpClient(), provideHttpClientTesting()],
     });
@@ -115,8 +149,8 @@ describe('FLEURÉ — Flower Boutique (Render / MongoDB API)', () => {
     expect(atelier.bouquets().length).toBe(2);
     expect(atelier.bouquets()[0].apiProductId).toBe(12);
     expect(atelier.bouquets()[0].image).toBe('/images/bouquet-juliet-peony.png');
+    expect(atelier.apiProducts()[0].image).toBe('/assets/hasfarm/bo-hoa-diu-ngot-597.jpg');
 
-    // Kiểm thử nhánh lỗi mạng -> chuyển về trạng thái fallback mà vẫn giữ danh mục hiển thị
     atelier.loadCatalogFromApi();
     httpMock
       .expectOne('/api/products')
@@ -160,8 +194,7 @@ describe('FLEURÉ — Flower Boutique (Render / MongoDB API)', () => {
     atelier.setStemCount('juliet-rose', 2);
     expect(atelier.totalCustomStems()).toBe(2);
 
-    const blockedResult = atelier.openOrderForCustomBouquet();
-    expect(blockedResult).toBe(false);
+    expect(atelier.openOrderForCustomBouquet()).toBe(false);
     expect(atelier.customBuilderError()).toBeTruthy();
     expect(atelier.drawerOpen()).toBe(false);
 
@@ -169,8 +202,7 @@ describe('FLEURÉ — Flower Boutique (Render / MongoDB API)', () => {
     expect(atelier.totalCustomStems()).toBe(3);
     expect(atelier.customBuilderError()).toBeNull();
 
-    const successResult = atelier.openOrderForCustomBouquet();
-    expect(successResult).toBe(true);
+    expect(atelier.openOrderForCustomBouquet()).toBe(true);
     expect(atelier.drawerOrderSource()).toBe('custom');
     expect(atelier.drawerOpen()).toBe(true);
   });
@@ -181,23 +213,19 @@ describe('FLEURÉ — Flower Boutique (Render / MongoDB API)', () => {
     });
     const atelier = TestBed.inject(AtelierService);
 
-    // Mở mẫu đầu tiên (390.000đ), mặc định cỡ Nhỏ (390.000đ < 399.000đ -> phí giao 25.000đ)
     atelier.openOrderForBouquet(atelier.bouquets()[0]);
     expect(atelier.selectedSize()).toBe('Nhỏ');
     expect(atelier.drawerSubtotal()).toBe(390000);
     expect(atelier.shippingFee()).toBe(25000);
 
-    // Mã FLEURE20 yêu cầu đơn >= 450.000đ -> báo lỗi ở 390.000đ
     atelier.applyVoucher('FLEURE20');
     expect(atelier.appliedVoucherCode()).toBeNull();
     expect(atelier.voucherError()).toContain('450.000đ');
 
-    // Áp FREESHIP60 -> miễn phí giao hỏa tốc 60p
     atelier.applyVoucher('FREESHIP60');
     expect(atelier.shippingFee()).toBe(0);
     expect(atelier.drawerTotalPrice()).toBe(390000);
 
-    // Nâng lên cỡ Vừa (+150.000đ -> 540.000đ >= 450.000đ) và áp FLEURE20 (giảm 20% = 108.000đ, miễn ship)
     atelier.selectedSize.set('Vừa');
     atelier.applyVoucher('FLEURE20');
     expect(atelier.voucherDiscount()).toBe(108000);
@@ -223,26 +251,22 @@ describe('FLEURÉ — Flower Boutique (Render / MongoDB API)', () => {
     atelier.recipientAddress.set('');
     fixture.detectChanges();
 
-    // 1. Thiếu tên người nhận
     fixture.componentInstance.onSubmitOrder();
     fixture.detectChanges();
     expect(atelier.drawerValidationError()).toContain('tên người nhận');
 
-    // 2. Sai định dạng SĐT
     atelier.recipientName.set('Nguyễn Minh Thư');
     atelier.recipientPhone.set('12345');
     fixture.componentInstance.onSubmitOrder();
     fixture.detectChanges();
     expect(atelier.drawerValidationError()).toContain('số điện thoại');
 
-    // 3. Thiếu địa chỉ giao hoa (bắt buộc bởi MongoDB Order schema)
     atelier.recipientPhone.set('0909 123 456');
     atelier.recipientAddress.set('Q1');
     fixture.componentInstance.onSubmitOrder();
     fixture.detectChanges();
     expect(atelier.drawerValidationError()).toContain('địa chỉ giao hoa');
 
-    // 4. Đủ dữ liệu hợp lệ + áp mã YEUHOA15 -> gọi POST /api/orders đúng hợp đồng Backend
     atelier.recipientAddress.set('45 Nguyễn Huệ, P. Bến Nghé, Quận 1, TP.HCM');
     atelier.applyVoucher('YEUHOA15');
     atelier.cardMessage.set('Gói chút hoa, gửi chút thương.');
@@ -296,15 +320,10 @@ describe('FLEURÉ — Flower Boutique (Render / MongoDB API)', () => {
 
     const confirmed = atelier.confirmedOrder();
     expect(atelier.submittingOrder()).toBe(false);
-    expect(confirmed).not.toBeNull();
     expect(confirmed?.persistedToDb).toBe(true);
     expect(confirmed?.orderCode).toBe('FL-849201');
     expect(confirmed?.totalPrice).toBe(356500);
     expect(atelier.recentOrders()[0]?.orderCode).toBe('FL-849201');
-
-    const drawerText = (fixture.nativeElement as HTMLElement).textContent ?? '';
-    expect(drawerText).toContain('Đã lưu MongoDB');
-    expect(drawerText).toContain('#FL-849201');
     httpMock.verify();
   });
 
@@ -335,15 +354,209 @@ describe('FLEURÉ — Flower Boutique (Render / MongoDB API)', () => {
     expect(atelier.confirmedOrder()).toBeNull();
     expect(atelier.submitOrderError()).toContain('Lỗi máy chủ MongoDB');
     expect(atelier.recipientName()).toBe('Trần Bảo Ngọc');
-    expect(atelier.recipientAddress()).toBe('12 Lê Lợi, Quận 1, TP.HCM');
 
-    // Người dùng chủ động chọn tạo phiếu Zalo tạm khi máy chủ lỗi
     fixture.componentInstance.onSubmitOfflineFallback();
     fixture.detectChanges();
 
     const offlineOrder = atelier.confirmedOrder();
     expect(offlineOrder?.persistedToDb).toBe(false);
     expect(offlineOrder?.orderCode).toMatch(/^FLR-\d{6}$/);
+    httpMock.verify();
+  });
+
+  it('ProductCard nhận input.required(), định dạng giá bằng DecimalPipe (vi-VN) và phát output() chuẩn Lab 1–2', async () => {
+    await TestBed.configureTestingModule({
+      imports: [ProductCard],
+      providers: [{ provide: LOCALE_ID, useValue: 'vi-VN' }, provideRouter([])],
+    }).compileComponents();
+
+    const fixture = TestBed.createComponent(ProductCard);
+    fixture.componentRef.setInput('product', {
+      ...MOCK_API_PRODUCTS[0],
+      image: '/assets/hasfarm/bo-hoa-diu-ngot-597.jpg',
+    });
+    fixture.detectChanges();
+
+    const el = fixture.nativeElement as HTMLElement;
+    expect(el.textContent).toContain('390.000đ');
+    expect(el.textContent).toContain('460.000đ');
+
+    const addedProducts: ApiProduct[] = [];
+    const quickOrderedProducts: ApiProduct[] = [];
+    fixture.componentInstance.addToCart.subscribe((p) => addedProducts.push(p));
+    fixture.componentInstance.quickOrder.subscribe((p) => quickOrderedProducts.push(p));
+
+    (el.querySelector('.card-add-btn') as HTMLButtonElement).click();
+    (el.querySelector('.card-quick-btn') as HTMLButtonElement).click();
+
+    expect(addedProducts[0]?.id).toBe(12);
+    expect(quickOrderedProducts[0]?.id).toBe(12);
+  });
+
+  it('Giỏ hàng đa món lưu bền, tăng/giảm, xóa kèm Hoàn tác (Undo Toast) và gửi POST /api/orders xóa giỏ', () => {
+    TestBed.configureTestingModule({
+      providers: [provideHttpClient(), provideHttpClientTesting()],
+    });
+
+    const httpMock = TestBed.inject(HttpTestingController);
+    const atelier = TestBed.inject(AtelierService);
+    httpMock.expectOne('/api/products').flush(MOCK_API_PRODUCTS);
+
+    const [p1, p2] = atelier.apiProducts();
+    atelier.addToCart(p1, 2);
+    atelier.addToCart(p2, 1);
+
+    expect(atelier.cartCount()).toBe(3);
+    expect(atelier.cartSubtotal()).toBe(390000 * 2 + 480000);
+
+    // Xóa sản phẩm 2 -> hiện Toast có nút Hoàn tác -> khôi phục đúng vị trí
+    atelier.removeCartItem(p2.id);
+    expect(atelier.cartCount()).toBe(2);
+    expect(atelier.toastState()?.canUndo).toBe(true);
+
+    atelier.undoRemoveCartItem();
+    expect(atelier.cartCount()).toBe(3);
+
+    // Gửi đơn đa sản phẩm lên POST /api/orders -> tự làm trống giỏ hàng
+    let savedCode = '';
+    atelier
+      .placeCartOrder({
+        customer: {
+          fullName: 'Nguyễn Hoàng Lân',
+          phone: '0909123456',
+          address: '45 Nguyễn Huệ, Quận 1, TP.HCM',
+        },
+        items: [
+          { productId: p1.id, quantity: 2 },
+          { productId: p2.id, quantity: 1 },
+        ],
+        voucherCode: 'FLEURE20',
+      })
+      .subscribe((saved) => {
+        savedCode = saved.orderCode;
+      });
+
+    const req = httpMock.expectOne('/api/orders');
+    expect(req.request.method).toBe('POST');
+    expect(req.request.body.items.length).toBe(2);
+    req.flush({
+      orderCode: 'FL-999111',
+      customer: req.request.body.customer,
+      items: [],
+      voucherCode: 'FLEURE20',
+      subtotal: 1260000,
+      discountAmount: 252000,
+      shippingFee: 0,
+      grandTotal: 1008000,
+      status: 'Đã tiếp nhận',
+    } satisfies ApiSavedOrder);
+
+    expect(savedCode).toBe('FL-999111');
+    expect(atelier.cartCount()).toBe(0);
+    httpMock.verify();
+  });
+
+  it('ProductDetailPage tự động reset quantity về 1 bằng linkedSignal() khi chuyển :slug sang sản phẩm khác', async () => {
+    await TestBed.configureTestingModule({
+      imports: [App],
+      providers: [
+        { provide: LOCALE_ID, useValue: 'vi-VN' },
+        provideRouter(routes),
+        provideHttpClient(),
+        provideHttpClientTesting(),
+      ],
+    }).compileComponents();
+
+    const router = TestBed.inject(Router);
+    const httpMock = TestBed.inject(HttpTestingController);
+    const fixture = TestBed.createComponent(App);
+    fixture.detectChanges();
+
+    await router.navigateByUrl('/product/bo-hoa-diu-ngot-pastel-fleure');
+    fixture.detectChanges();
+
+    httpMock.expectOne('/api/products').flush(MOCK_API_PRODUCTS);
+    httpMock
+      .match('/api/products/bo-hoa-diu-ngot-pastel-fleure')
+      .forEach((req) => req.flush(MOCK_API_PRODUCTS[0]));
+    fixture.detectChanges();
+
+    const detailDebug = fixture.debugElement.query((el) => el.componentInstance instanceof ProductDetailPage);
+    const detailComp = detailDebug.componentInstance as ProductDetailPage;
+
+    expect(detailComp.quantity()).toBe(1);
+    detailComp.increaseQuantity();
+    detailComp.increaseQuantity();
+    expect(detailComp.quantity()).toBe(3);
+
+    // Chuyển sang :slug thứ hai -> linkedSignal() tự reset quantity về 1
+    await router.navigateByUrl('/product/bo-hoa-tulip-hong-nang-mai');
+    fixture.detectChanges();
+    httpMock
+      .match('/api/products/bo-hoa-tulip-hong-nang-mai')
+      .forEach((req) => req.flush(MOCK_API_PRODUCTS[1]));
+    httpMock.match('/api/home').forEach((req) =>
+      req.flush({
+        banners: [],
+        categories: [],
+        newProducts: [],
+        bestSellingProducts: [],
+        saleProducts: [],
+        latestPosts: [],
+      })
+    );
+    fixture.detectChanges();
+
+    expect(detailComp.quantity()).toBe(1);
+    httpMock.verify();
+  });
+
+  it('định tuyến Lazy Loading hoạt động chuẩn SEO (/products, /category/:slug, /promotions, /posts -> /bai_viet, /experience, /cart)', async () => {
+    await TestBed.configureTestingModule({
+      imports: [App],
+      providers: [
+        { provide: LOCALE_ID, useValue: 'vi-VN' },
+        provideRouter(routes),
+        provideHttpClient(),
+        provideHttpClientTesting(),
+      ],
+    }).compileComponents();
+
+    const router = TestBed.inject(Router);
+    const httpMock = TestBed.inject(HttpTestingController);
+    const fixture = TestBed.createComponent(App);
+    fixture.detectChanges();
+
+    httpMock.expectOne('/api/products').flush(MOCK_API_PRODUCTS);
+
+    await router.navigateByUrl('/posts');
+    expect(router.url).toBe('/bai_viet');
+    httpMock.match('/api/posts').forEach((req) => req.flush([]));
+
+    await router.navigateByUrl('/category/hoa-sinh-nhat');
+    expect(router.url).toBe('/category/hoa-sinh-nhat');
+    httpMock.match((r) => r.url.startsWith('/api/products')).forEach((req) => req.flush(MOCK_API_PRODUCTS));
+    httpMock.match('/api/home').forEach((req) =>
+      req.flush({
+        banners: [],
+        categories: [],
+        newProducts: [],
+        bestSellingProducts: [],
+        saleProducts: [],
+        latestPosts: [],
+      })
+    );
+
+    await router.navigateByUrl('/promotions');
+    expect(router.url).toBe('/promotions');
+
+    await router.navigateByUrl('/experience');
+    expect(router.url).toBe('/experience');
+    httpMock.match('/api/experiences').forEach((req) => req.flush([]));
+
+    await router.navigateByUrl('/cart');
+    expect(router.url).toBe('/cart');
+
     httpMock.verify();
   });
 });

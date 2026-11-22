@@ -8,6 +8,7 @@ import {
   PLATFORM_ID,
   viewChildren,
 } from '@angular/core';
+import { RouterLink } from '@angular/router';
 import { IconComponent } from '../shared/icon/icon';
 import { BouquetItem } from '../../models/atelier.models';
 import { AtelierService } from '../../services/atelier.service';
@@ -40,7 +41,7 @@ export interface HangingSlotView {
 @Component({
   selector: 'app-hanging-gallery',
   standalone: true,
-  imports: [IconComponent],
+  imports: [RouterLink, IconComponent],
   templateUrl: './hanging-gallery.html',
   styleUrl: './hanging-gallery.css',
   changeDetection: ChangeDetectionStrategy.OnPush,

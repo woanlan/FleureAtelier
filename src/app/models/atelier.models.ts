@@ -266,3 +266,108 @@ export interface ConfirmedOrder extends OrderDraft {
   /** Đánh dấu đơn có thêm tùy chọn nâng cấp cỡ, quà tặng kèm hoặc bó phối riêng ghi chú cho nghệ nhân */
   hasAtelierExtras: boolean;
 }
+
+// ============================================================================
+// HỢP ĐỒNG DỮ LIỆU ĐA TRANG & 6 COLLECTION MONGODB (`fleure_shop`)
+// ============================================================================
+
+/** Danh mục hoa tươi đồng bộ từ `GET /api/categories` hoặc `GET /api/home` */
+export interface ApiCategory {
+  id: number;
+  name: string;
+  slug: string;
+  order: number;
+  icon: string;
+  description: string;
+}
+
+/** Banner khuyến mãi / chiến dịch đồng bộ từ `GET /api/banners` hoặc `GET /api/home` */
+export interface ApiBanner {
+  id: number;
+  slug: string;
+  badge: string;
+  title: string;
+  subtitle: string;
+  ctaLabel: string;
+  ctaRoute: string;
+  image: string;
+  order: number;
+  isActive: boolean;
+}
+
+/** Danh mục bài viết cẩm nang hoa */
+export type PostCategory =
+  | 'Tất cả'
+  | 'Chăm sóc hoa'
+  | 'Ý nghĩa hoa'
+  | 'Nghệ thuật gói'
+  | 'Xu hướng';
+
+/** Bài viết cẩm nang đồng bộ từ `GET /api/posts` */
+export interface ApiPost {
+  id: number;
+  slug: string;
+  title: string;
+  excerpt: string;
+  content: string[];
+  careTip: string;
+  image: string;
+  category: Exclude<PostCategory, 'Tất cả'>;
+  author: string;
+  publishedAt: string;
+  readTimeMinutes: number;
+  relatedProductId: number;
+}
+
+/** Danh mục video trải nghiệm Atelier */
+export type ExperienceCategory =
+  | 'Tất cả'
+  | 'Atelier FLEURÉ'
+  | 'Kỹ thuật bó hoa'
+  | 'Chăm hoa tại nhà';
+
+/** Video trải nghiệm bó hoa & workshop đồng bộ từ `GET /api/experiences` */
+export interface ApiExperienceVideo {
+  id: number;
+  slug: string;
+  title: string;
+  subtitle: string;
+  category: Exclude<ExperienceCategory, 'Tất cả'>;
+  duration: string;
+  views: number;
+  posterImage: string;
+  videoUrl: string;
+  steps: string[];
+  linkedProductId: number;
+  publishedAt: string;
+}
+
+/** Dữ liệu tổng hợp 6 khối cho trang chủ trả về từ `GET /api/home` */
+export interface ApiHomePayload {
+  banners: ApiBanner[];
+  categories: ApiCategory[];
+  newProducts: ApiProduct[];
+  bestSellingProducts: ApiProduct[];
+  saleProducts: ApiProduct[];
+  latestPosts: ApiPost[];
+}
+
+/** Một dòng sản phẩm nằm trong giỏ hàng đa món (`/cart`) lưu tại localStorage */
+export interface CartItem {
+  product: ApiProduct;
+  quantity: number;
+}
+
+/** 5 chế độ sắp xếp sản phẩm trên trang `/products` và `/category/:slug` */
+export type ProductSortOption =
+  | 'newest'
+  | 'bestseller'
+  | 'promotion'
+  | 'price-asc'
+  | 'price-desc';
+
+/** Trạng thái thông báo Toast nổi cuối màn hình (hỗ trợ Hoàn tác khi xóa sản phẩm khỏi giỏ) */
+export interface ToastState {
+  message: string;
+  canUndo: boolean;
+}

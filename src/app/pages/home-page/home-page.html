@@ -1,0 +1,86 @@
+<!-- 5 phân khu trải nghiệm cốt lõi của FLEURÉ — giữ nguyên 100% bản sắc biên tập -->
+<app-hero-atelier />
+<app-hanging-gallery />
+<app-occasion-showcase />
+<app-custom-bouquet-studio />
+<app-seasonal-calendar />
+
+<!-- Phân khu 6: Kết nối toàn bộ không gian đa trang FLEURÉ (Danh mục SEO, Khuyến mãi, Cẩm nang & Video Atelier) -->
+<section class="discovery-section" aria-labelledby="discovery-heading">
+  <div class="atelier-container">
+    <header class="discovery-header">
+      <div>
+        <p class="discovery-eyebrow">Không gian cửa hàng đầy đủ</p>
+        <h2 id="discovery-heading" class="discovery-heading">Khám phá thêm tại FLEURÉ.</h2>
+      </div>
+      <a routerLink="/products" class="discovery-all-link">
+        <span>Xem tất cả {{ atelier.apiProducts().length }} mẫu hoa</span>
+        <app-icon name="arrow-right" [size]="16" />
+      </a>
+    </header>
+
+    <!-- Dải danh mục hoa đồng bộ trực tiếp từ collection `categories` (MongoDB) — lưới 2 cột đều 6 mục -->
+    <nav class="category-pill-strip" aria-label="Danh mục hoa theo chủ đề">
+      @for (cat of atelier.categories(); track cat.id) {
+        <a [routerLink]="['/category', cat.slug]" class="category-pill-link">
+          <span class="category-pill-name">{{ cat.name }}</span>
+          <app-icon name="chevron-right" [size]="15" />
+        </a>
+      }
+      <a routerLink="/products" class="category-pill-link category-pill-link--all">
+        <span class="category-pill-name">Tất cả mẫu hoa</span>
+        <app-icon name="arrow-right" [size]="15" />
+      </a>
+    </nav>
+
+    <!-- 3 thẻ trải nghiệm đa trang chuẩn gu editorial FLEURÉ -->
+    <div class="discovery-grid">
+      <a routerLink="/promotions" class="discovery-card discovery-card--ruby">
+        <div class="discovery-card-top">
+          <span class="discovery-tag">Flash Sale · Mã FLEURE20</span>
+          <app-icon name="badge-percent" [size]="20" />
+        </div>
+        <h3 class="discovery-card-title">Ưu đãi cuối tuần giảm đến 30%</h3>
+        <p class="discovery-card-desc">
+          Hiện có {{ saleCount() }} mẫu hoa tươi ưu đãi kèm 3 mã giảm giá FLEURE20, YEUHOA15 và
+          FREESHIP60 sao chép một chạm.
+        </p>
+        <span class="discovery-card-cta">
+          <span>Săn ưu đãi ngay</span>
+          <app-icon name="arrow-up-right" [size]="16" />
+        </span>
+      </a>
+
+      @if (featuredPost(); as post) {
+        <a routerLink="/bai_viet" [queryParams]="{ id: post.id }" class="discovery-card">
+          <div class="discovery-card-top">
+            <span class="discovery-tag">Góc Cẩm Nang · {{ post.category }}</span>
+            <app-icon name="book-open" [size]="20" />
+          </div>
+          <h3 class="discovery-card-title">{{ post.title }}</h3>
+          <p class="discovery-card-desc">{{ post.excerpt }}</p>
+          <span class="discovery-card-cta">
+            <span>Đọc tất cả bài viết</span>
+            <app-icon name="arrow-up-right" [size]="16" />
+          </span>
+        </a>
+      }
+
+      <a routerLink="/experience" class="discovery-card">
+        <div class="discovery-card-top">
+          <span class="discovery-tag">Atelier Video · 4 tập</span>
+          <app-icon name="film" [size]="20" />
+        </div>
+        <h3 class="discovery-card-title">Nghệ thuật bó xoắn gốc & gói lụa Pháp</h3>
+        <p class="discovery-card-desc">
+          Theo chân nghệ nhân FLEURÉ qua video hướng dẫn phối màu giấy lụa Hàn Quốc và mẹo giữ hoa
+          tươi lâu tại nhà.
+        </p>
+        <span class="discovery-card-cta">
+          <span>Xem video trải nghiệm</span>
+          <app-icon name="arrow-up-right" [size]="16" />
+        </span>
+      </a>
+    </div>
+  </div>
+</section>

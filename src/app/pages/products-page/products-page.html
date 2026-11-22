@@ -1,0 +1,242 @@
+<!-- Trang Bộ sưu tập & Danh mục hoa FLEURÉ (khung Mobile-First 430px) -->
+<section class="products-page" aria-labelledby="catalog-page-heading">
+  <!-- Phần đầu trang: Đường dẫn, tiêu đề H1, mô tả và bộ đếm kết quả -->
+  <header class="products-header">
+    <div class="atelier-container">
+      <nav class="catalog-breadcrumb" aria-label="Đường dẫn trang">
+        <ol class="breadcrumb-list">
+          <li class="breadcrumb-item">
+            <a routerLink="/" class="breadcrumb-link">Trang chủ</a>
+          </li>
+
+          @if (activeCategorySlug() !== 'tat-ca') {
+            <li class="breadcrumb-item">
+              <app-icon name="chevron-right" [size]="14" class="breadcrumb-sep" />
+              <a routerLink="/products" class="breadcrumb-link">Bộ sưu tập hoa</a>
+            </li>
+          }
+
+          <li class="breadcrumb-item breadcrumb-item--current">
+            <app-icon name="chevron-right" [size]="14" class="breadcrumb-sep" />
+            <span class="breadcrumb-current" aria-current="page" [attr.title]="breadcrumbLabel()">
+              {{ breadcrumbLabel() }}
+            </span>
+          </li>
+        </ol>
+      </nav>
+
+      <h1 id="catalog-page-heading" class="catalog-heading">{{ pageTitle() }}</h1>
+      <p class="catalog-subtitle">{{ pageDescription() }}</p>
+
+      <!-- Ô tìm kiếm trực tiếp ngay trong trang danh mục -->
+      <form
+        class="catalog-search-form"
+        role="search"
+        aria-label="Tìm kiếm mẫu hoa trong bộ sưu tập"
+        (submit)="onSearchSubmit($event)"
+      >
+        <label for="catalog-search-input" class="sr-only">Tìm kiếm mẫu hoa FLEURÉ</label>
+        <div class="search-field-wrap">
+          <app-icon name="search" [size]="17" class="search-field-icon" />
+          <input
+            id="catalog-search-input"
+            type="search"
+            name="search"
+            autocomplete="off"
+            enterkeyhint="search"
+            class="search-field-input"
+            placeholder="Tìm hồng pastel, tulip..."
+            [value]="searchInputValue()"
+            (input)="onSearchInput($event)"
+          />
+          @if (searchInputValue()) {
+            <button
+              type="button"
+              class="search-clear-btn"
+              aria-label="Xóa từ khóa tìm kiếm"
+              (click)="clearSearch()"
+            >
+              <app-icon name="x" [size]="16" />
+            </button>
+          }
+        </div>
+        <button type="submit" class="search-submit-btn">Tìm</button>
+      </form>
+
+      <!-- Dòng bộ đếm kết quả & trạng thái đồng bộ -->
+      <div class="catalog-status-row" aria-live="polite">
+        <p class="catalog-count">
+          Tìm thấy
+          <strong class="catalog-count-strong tabular-nums">{{ totalFilteredCount() }}</strong>
+          /
+          <span class="tabular-nums">{{ totalCatalogCount() }}</span>
+          mẫu hoa
+        </p>
+
+        @if (isSyncing()) {
+          <span class="sync-badge" role="status">Đang đồng bộ...</span>
+        } @else if (appliedSearchTerm()) {
+          <button
+            type="button"
+            class="active-search-pill"
+            [attr.aria-label]="'Bỏ từ khóa tìm kiếm ' + appliedSearchTerm()"
+            (click)="clearSearch()"
+          >
+            <span class="active-search-text">“{{ appliedSearchTerm() }}”</span>
+            <app-icon name="x" [size]="13" />
+          </button>
+        }
+      </div>
+    </div>
+  </header>
+
+  <!-- Dải chip danh mục & 5 nút sắp xếp cuộn ngang mượt (tràn sát 2 mép khung 430px) -->
+  <div class="catalog-controls" #catalogGridTop>
+    <nav class="chip-scroller scrollbar-clean" aria-label="Lọc theo danh mục hoa">
+      <div class="chip-track">
+        <a
+          routerLink="/products"
+          [queryParams]="preservedSearchParams()"
+          class="category-chip"
+          [class.is-active]="activeCategorySlug() === 'tat-ca'"
+          [attr.aria-current]="activeCategorySlug() === 'tat-ca' ? 'page' : null"
+        >
+          <app-icon name="layout-grid" [size]="15" />
+          <span>Tất cả</span>
+        </a>
+
+        @for (cat of atelier.categories(); track cat.id) {
+          <a
+            [routerLink]="['/category', cat.slug]"
+            [queryParams]="preservedSearchParams()"
+            class="category-chip"
+            [class.is-active]="activeCategorySlug() === cat.slug"
+            [attr.aria-current]="activeCategorySlug() === cat.slug ? 'page' : null"
+          >
+            <app-icon [name]="resolveCategoryIcon(cat.icon)" [size]="15" />
+            <span>{{ cat.name }}</span>
+          </a>
+        }
+      </div>
+    </nav>
+
+    <div class="chip-scroller scrollbar-clean" role="group" aria-label="Sắp xếp mẫu hoa">
+      <div class="chip-track chip-track--sort">
+        @for (option of sortOptions; track option.value) {
+          <button
+            type="button"
+            class="sort-chip"
+            [class.is-active]="activeSort() === option.value"
+            [attr.aria-pressed]="activeSort() === option.value"
+            (click)="selectSort(option.value)"
+          >
+            <app-icon [name]="option.icon" [size]="15" />
+            <span>{{ option.label }}</span>
+          </button>
+        }
+      </div>
+    </div>
+  </div>
+
+  <!-- Thông báo nhẹ khi đang dùng bộ sưu tập lưu sẵn lúc Render khởi động lạnh -->
+  @if (atelier.catalogStatus() === 'fallback' && atelier.catalogError(); as fallbackMsg) {
+    <div class="atelier-container">
+      <div class="fallback-notice" role="status">
+        <p class="fallback-notice-text">{{ fallbackMsg }}</p>
+        <button
+          type="button"
+          class="fallback-retry-btn"
+          (click)="atelier.loadCatalogFromApi()"
+        >
+          <app-icon name="rotate-ccw" [size]="14" />
+          <span>Tải lại</span>
+        </button>
+      </div>
+    </div>
+  }
+
+  <!-- Lưới sản phẩm 2 cột chuẩn ASM 1 & phân trang 6 mẫu/trang -->
+  <div class="atelier-container catalog-body">
+    <div class="products-grid" [attr.aria-busy]="isSyncing()">
+      @for (item of paginatedProducts(); track item.id) {
+        <app-product-card
+          [product]="item"
+          (addToCart)="atelier.addToCart($event)"
+          (quickOrder)="atelier.openOrderForApiProduct($event)"
+        />
+      } @empty {
+        <div class="catalog-empty" role="status">
+          <div class="catalog-empty-icon" aria-hidden="true">
+            <app-icon [name]="appliedSearchTerm() ? 'search' : 'flower-2'" [size]="24" />
+          </div>
+          <h2 class="catalog-empty-title">
+            @if (appliedSearchTerm()) {
+              Không tìm thấy mẫu hoa khớp “{{ appliedSearchTerm() }}”
+            } @else if (activeCategory(); as cat) {
+              Chưa có mẫu hoa trong {{ cat.name }}
+            } @else {
+              Không có mẫu hoa phù hợp bộ lọc
+            }
+          </h2>
+          <p class="catalog-empty-desc">
+            Thử từ khóa khác hoặc đặt lại bộ lọc để xem toàn bộ
+            <span class="tabular-nums">{{ totalCatalogCount() }}</span> mẫu hoa tươi Đà Lạt tại
+            FLEURÉ.
+          </p>
+          <button type="button" class="catalog-reset-btn" (click)="resetAllFilters()">
+            <app-icon name="rotate-ccw" [size]="16" />
+            <span>Xóa bộ lọc &amp; xem tất cả</span>
+          </button>
+        </div>
+      }
+    </div>
+
+    <!-- Thanh phân trang chuẩn vùng chạm >= 44×44px (chỉ hiển thị khi có từ 2 trang trở lên) -->
+    @if (totalPages() > 1) {
+      <nav class="pagination-bar" aria-label="Phân trang danh mục hoa">
+        <div class="pagination-controls">
+          <button
+            type="button"
+            class="page-nav-btn"
+            [disabled]="safeCurrentPage() <= 1"
+            aria-label="Trang trước"
+            (click)="goToPage(safeCurrentPage() - 1)"
+          >
+            <app-icon name="chevron-left" [size]="16" />
+            <span>Trước</span>
+          </button>
+
+          <div class="page-numbers">
+            @for (page of pageNumbers(); track page) {
+              <button
+                type="button"
+                class="page-num-btn tabular-nums"
+                [class.is-current]="page === safeCurrentPage()"
+                [attr.aria-current]="page === safeCurrentPage() ? 'page' : null"
+                [attr.aria-label]="'Trang ' + page"
+                (click)="goToPage(page)"
+              >
+                {{ page }}
+              </button>
+            }
+          </div>
+
+          <button
+            type="button"
+            class="page-nav-btn"
+            [disabled]="safeCurrentPage() >= totalPages()"
+            aria-label="Trang sau"
+            (click)="goToPage(safeCurrentPage() + 1)"
+          >
+            <span>Sau</span>
+            <app-icon name="chevron-right" [size]="16" />
+          </button>
+        </div>
+
+        <p class="pagination-meta tabular-nums">
+          Trang {{ safeCurrentPage() }} / {{ totalPages() }}
+        </p>
+      </nav>
+    }
+  </div>
+</section>

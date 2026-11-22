@@ -51,34 +51,32 @@
   -webkit-overflow-scrolling: touch;
 }
 
-/* Mép mờ chỉ dẫn còn mục khuất bên phải / bên trái trên màn hẹp (luật R10) */
-@media (max-width: 1023.98px) {
-  .occasion-chip-scroller.fade-right:not(.fade-left) {
-    -webkit-mask-image: linear-gradient(90deg, #000 calc(100% - 36px), transparent 100%);
-    mask-image: linear-gradient(90deg, #000 calc(100% - 36px), transparent 100%);
-  }
+/* Mép mờ chỉ dẫn còn mục khuất bên phải / bên trái trong khung 430px */
+.occasion-chip-scroller.fade-right:not(.fade-left) {
+  -webkit-mask-image: linear-gradient(90deg, #000 calc(100% - 36px), transparent 100%);
+  mask-image: linear-gradient(90deg, #000 calc(100% - 36px), transparent 100%);
+}
 
-  .occasion-chip-scroller.fade-left:not(.fade-right) {
-    -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 36px);
-    mask-image: linear-gradient(90deg, transparent 0, #000 36px);
-  }
+.occasion-chip-scroller.fade-left:not(.fade-right) {
+  -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 36px);
+  mask-image: linear-gradient(90deg, transparent 0, #000 36px);
+}
 
-  .occasion-chip-scroller.fade-left.fade-right {
-    -webkit-mask-image: linear-gradient(
-      90deg,
-      transparent 0,
-      #000 32px,
-      #000 calc(100% - 32px),
-      transparent 100%
-    );
-    mask-image: linear-gradient(
-      90deg,
-      transparent 0,
-      #000 32px,
-      #000 calc(100% - 32px),
-      transparent 100%
-    );
-  }
+.occasion-chip-scroller.fade-left.fade-right {
+  -webkit-mask-image: linear-gradient(
+    90deg,
+    transparent 0,
+    #000 32px,
+    #000 calc(100% - 32px),
+    transparent 100%
+  );
+  mask-image: linear-gradient(
+    90deg,
+    transparent 0,
+    #000 32px,
+    #000 calc(100% - 32px),
+    transparent 100%
+  );
 }
 
 .occasion-list {
@@ -186,13 +184,13 @@
   border-color: var(--primary);
 }
 
-@media (max-width: 1023.98px) and (any-pointer: fine) {
+@media (any-pointer: fine) {
   .chip-scroll-arrow {
     display: flex;
   }
 }
 
-/* --- 2. Tiêu đề tạp chí lớn --- */
+/* --- 2. Tiêu đề tạp chí lớn (cân tỉ lệ khung 430px) --- */
 .occasion-header {
   display: flex;
   flex-direction: column;
@@ -202,9 +200,9 @@
 
 .occasion-headline {
   font-family: var(--font-serif);
-  font-size: clamp(2.6rem, 6vw, 5rem);
+  font-size: 2.35rem;
   font-weight: 600;
-  line-height: 1.04;
+  line-height: 1.08;
   letter-spacing: 0.01em;
   text-wrap: balance;
   transition: color 400ms var(--ease-editorial);
@@ -215,7 +213,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 1.125rem;
+  gap: 1rem;
 }
 
 .centerpiece-figure {
@@ -227,11 +225,11 @@
 }
 
 .centerpiece-img {
-  height: clamp(260px, 40vh, 410px);
+  height: 270px;
   width: auto;
   max-width: 100%;
   object-fit: contain;
-  filter: drop-shadow(0 24px 32px rgba(31, 26, 23, 0.16));
+  filter: drop-shadow(0 20px 28px rgba(31, 26, 23, 0.16));
   transition: transform 380ms var(--ease-editorial);
 }
 
@@ -424,129 +422,4 @@
   line-height: 1.25;
   color: var(--ink-secondary);
   white-space: nowrap;
-}
-
-/* ==========================================================================
-   SÂN KHẤU BIÊN TẬP DESKTOP (>= 1024px) — KHỚP VIDEO SHOWCASE
-   - Đỉnh giữa: Tiêu đề lớn Cormorant Garamond
-   - Giữa sân khấu: Bó hoa studio lớn + thanh đặt hoa
-   - Trái dưới: Khối thơ ca Chọn theo dịp
-   - Phải giữa: Danh sách dọc 6 dịp + nhãn Đang xem
-   - Phải dưới: Hàng ngang 4 thẻ vòm thu nhỏ
-   ========================================================================== */
-@media (min-width: 1024px) {
-  .occasion-stage-grid {
-    padding-inline: var(--gutter-inline);
-    grid-template-columns: minmax(0, 0.84fr) minmax(0, 1.12fr) minmax(0, 1.32fr);
-    grid-template-rows: auto 1fr auto;
-    grid-template-areas:
-      'header header header'
-      'poetry center switcher'
-      'poetry center thumbs';
-    column-gap: clamp(1.25rem, 2.5vw, 2.5rem);
-    row-gap: 1.5rem;
-    align-items: stretch;
-  }
-
-  .occasion-header,
-  .occasion-center,
-  .occasion-poetry,
-  .occasion-thumbs-wrap {
-    padding-inline: 0;
-  }
-
-  .occasion-header {
-    grid-area: header;
-    margin-bottom: 0.5rem;
-  }
-
-  .occasion-center {
-    grid-area: center;
-    align-self: center;
-    justify-self: center;
-    width: 100%;
-  }
-
-  .centerpiece-img {
-    height: clamp(280px, 42vh, 420px);
-  }
-
-  .occasion-poetry {
-    grid-area: poetry;
-    align-self: end;
-    padding-bottom: 0.25rem;
-  }
-
-  /* Danh sách 6 dịp chuyển sang xếp dọc ở phải giữa */
-  .occasion-switcher-wrap {
-    grid-area: switcher;
-    align-self: center;
-    justify-self: end;
-    width: 100%;
-    max-width: 21rem;
-  }
-
-  .occasion-chip-scroller {
-    overflow: visible;
-  }
-
-  .occasion-list {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 0.375rem;
-    padding: 0.375rem;
-    border-radius: var(--radius-lg);
-    background-color: rgba(255, 255, 255, 0.52);
-    border: 1px solid var(--border-subtle);
-  }
-
-  .occasion-btn {
-    width: 100%;
-    min-height: 40px;
-    padding: 0.5rem 0.875rem;
-    border-radius: var(--radius-md);
-    border-color: transparent;
-    background-color: transparent;
-    color: var(--ink-secondary);
-  }
-
-  .occasion-btn:not(.is-active):hover {
-    background-color: var(--primary-light);
-    border-color: var(--border-strong);
-    color: var(--ink-primary);
-  }
-
-  .occasion-btn.is-active {
-    background-color: #ffffff;
-    border-color: var(--primary);
-    color: var(--ink-primary);
-  }
-
-  .occasion-btn.is-active:hover {
-    background-color: #ffffff;
-    border-color: var(--primary-hover);
-  }
-
-  .occasion-active-pill {
-    display: inline-flex;
-  }
-
-  /* Hàng 4 thẻ vòm ở góc dưới bên phải */
-  .occasion-thumbs-wrap {
-    grid-area: thumbs;
-    align-self: end;
-  }
-
-  .occasion-thumbs-grid {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 0.625rem;
-  }
-
-  .occasion-thumb-card {
-    padding: 0.625rem 0.375rem 0.5rem;
-  }
-
-  .thumb-arch-name {
-    font-size: 0.75rem;
-  }
 }

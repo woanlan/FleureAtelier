@@ -379,27 +379,7 @@
   transform: scale(0.95);
 }
 
-/* Trên màn hình >= 768px: neo hai nút ở hai biên sân khấu, căn giữa dọc bằng inset-block + margin auto (N11) */
-@media (min-width: 768px) {
-  .stage-nav-btn {
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    margin-block: auto;
-  }
-
-  .stage-nav-prev {
-    left: 0.25rem;
-  }
-
-  .stage-nav-next {
-    right: 0.25rem;
-  }
-
-  .stage-mobile-counter {
-    display: none;
-  }
-}
+/* Giữ nút điều hướng Trái / Phải và bộ đếm căn giữa ngay dưới sân khấu trong khung 430px */
 
 /* --- Bảng tên gỗ trầm Espresso dưới bó hoa đang chọn --- */
 .bouquet-plaque {
@@ -512,6 +492,37 @@
   white-space: nowrap;
 }
 
+.plaque-cta-actions {
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.plaque-detail-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: 0.625rem 1.125rem;
+  border: 1px solid rgba(242, 184, 198, 0.48);
+  border-radius: var(--radius-pill);
+  background-color: transparent;
+  color: var(--text-on-dark);
+  font-family: var(--font-sans);
+  font-size: 0.875rem;
+  font-weight: 500;
+  white-space: nowrap;
+  transition:
+    background-color 180ms var(--ease-editorial),
+    border-color 180ms var(--ease-editorial);
+}
+
+.plaque-detail-link:hover {
+  background-color: rgba(242, 184, 198, 0.14);
+  border-color: var(--gold-metallic);
+}
+
 .plaque-cta-btn {
   display: inline-flex;
   align-items: center;
@@ -545,119 +556,97 @@
   transform: scale(0.98);
 }
 
-/* --- Dải nút chấm / viên nang chọn nhanh bên dưới --- */
+/* --- Dải nút chấm / viên nang chọn nhanh bên dưới (7 nút 44x44px không chồng lấn) --- */
 .hanging-dots-row {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 1.625rem;
-  margin-top: 1.75rem;
-  padding-block: 0.75rem;
+  gap: 0.25rem;
+  margin-top: 1rem;
   max-width: 100%;
 }
 
 .hanging-dot-btn {
   position: relative;
   flex-shrink: 0;
-  width: 22px;
-  height: 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
   padding: 0;
+  border: none;
+  border-radius: var(--radius-pill);
+  background-color: transparent;
+  cursor: pointer;
+}
+
+.hanging-dot-btn::after {
+  content: '';
+  width: 22px;
+  height: 7px;
   border: 1px solid rgba(242, 184, 198, 0.45);
   border-radius: var(--radius-pill);
   background-color: rgba(253, 244, 246, 0.22);
-  cursor: pointer;
   transition:
     background-color 200ms var(--ease-editorial),
     border-color 200ms var(--ease-editorial),
     transform 200ms var(--ease-editorial);
 }
 
-.hanging-dot-btn::before {
-  content: '';
-  position: absolute;
-  /* N9 & N11: Nới vùng chạm viên chỉ báo 22x8px lên 46x46px (>= 44x44px) mà không phóng to hình */
-  inset: -19px -12px;
-}
-
-.hanging-dot-btn:hover {
+.hanging-dot-btn:hover::after {
   background-color: rgba(242, 184, 198, 0.58);
   border-color: var(--gold-metallic);
 }
 
-.hanging-dot-btn.is-active {
+.hanging-dot-btn.is-active::after {
   background-color: var(--gold-metallic);
   border-color: var(--gold-metallic);
   transform: scaleX(1.18);
 }
 
-/* --- Điều chỉnh cho màn hình vừa (768px – 1023px) --- */
-@media (min-width: 768px) and (max-width: 1023.98px) {
-  .hanging-slot[data-slot='neg1'] {
-    /* N11: Thu khoảng cách nhánh trái vừa khổ máy tính bảng 768px */
-    transform: translate3d(-165px, 0, 0);
-  }
-
-  .hanging-slot[data-slot='pos1'] {
-    transform: translate3d(165px, 0, 0);
-  }
-
-  .hanging-slot[data-slot='neg2'] {
-    /* N11: Thu khoảng cách rìa trái vừa khổ máy tính bảng 768px */
-    transform: translate3d(-290px, 0, 0);
-  }
-
-  .hanging-slot[data-slot='pos2'] {
-    transform: translate3d(290px, 0, 0);
-  }
+/* --- Vị trí khung Mobile 430px (hiển thị 3 bó cân đối trên thanh đồng, ẩn rìa ±2 chống tràn) --- */
+.hanging-stage {
+  height: 292px;
 }
 
-/* --- Điều chỉnh cho điện thoại (< 768px, chuẩn 375px không tràn ngang) --- */
-@media (max-width: 767.98px) {
-  .hanging-stage {
-    height: 292px;
-  }
+.bouquet-hang-btn {
+  width: 164px;
+}
 
-  .bouquet-hang-btn {
-    width: 164px;
-  }
+.hanging-slot[data-slot='neg1'] {
+  transform: translate3d(-108px, 0, 0);
+}
 
-  .hanging-slot[data-slot='neg1'] {
-    /* N11: Dịch nhánh trái 108px trên màn 375px để thoáng đãng và không chồng lấn vùng chạm */
-    transform: translate3d(-108px, 0, 0);
-  }
+.hanging-slot[data-slot='pos1'] {
+  transform: translate3d(108px, 0, 0);
+}
 
-  .hanging-slot[data-slot='pos1'] {
-    transform: translate3d(108px, 0, 0);
-  }
+.hanging-slot[data-slot='neg2'],
+.hanging-slot[data-slot='pos2'] {
+  opacity: 0;
+  pointer-events: none;
+  visibility: hidden;
+}
 
-  /* Ẩn hoàn toàn 2 bó rìa ngoài (offset -2 / +2) trên màn < 768px để không gian thoáng và 0 tràn ngang */
-  .hanging-slot[data-slot='neg2'],
-  .hanging-slot[data-slot='pos2'] {
-    opacity: 0;
-    pointer-events: none;
-    visibility: hidden;
-  }
+.stage-nav-controls {
+  pointer-events: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  margin-top: 0.75rem;
+}
 
-  .stage-nav-controls {
-    pointer-events: auto;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 1rem;
-    margin-top: 0.75rem;
-  }
+.stage-mobile-counter {
+  font-family: var(--font-sans);
+  font-size: 0.875rem;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  color: var(--text-on-dark-muted);
+}
 
-  .stage-mobile-counter {
-    font-family: var(--font-sans);
-    font-size: 0.875rem;
-    font-weight: 500;
-    letter-spacing: 0.08em;
-    color: var(--text-on-dark-muted);
-  }
-
-  /* Luật R4: Card ở mobile dùng padding p-4 -> p-5 (1.125rem), không bê p-8 xuống */
-  .bouquet-plaque {
-    padding: 1.125rem;
-    gap: 0.875rem;
-  }
+.bouquet-plaque {
+  padding: 1.125rem;
+  gap: 0.875rem;
 }

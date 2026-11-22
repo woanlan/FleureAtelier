@@ -1,0 +1,281 @@
+<!-- Đầu trang Góc Cẩm Nang Hoa: Breadcrumb + Tiêu đề H1 + Dải 5 tab danh mục cuộn ngang -->
+<header class="posts-header">
+  <div class="atelier-container">
+    <nav class="posts-breadcrumb" aria-label="Đường dẫn">
+      <ol class="breadcrumb-list">
+        <li class="breadcrumb-item">
+          <a routerLink="/" class="breadcrumb-link">Trang chủ</a>
+        </li>
+        <li class="breadcrumb-sep" aria-hidden="true">
+          <app-icon name="chevron-right" [size]="14" />
+        </li>
+        <li class="breadcrumb-item breadcrumb-current" aria-current="page">Góc cẩm nang hoa</li>
+      </ol>
+    </nav>
+
+    <h1 class="posts-heading">Góc Cẩm Nang Hoa.</h1>
+    <p class="posts-lead">
+      Bí quyết giữ hoa tươi lâu, ngôn ngữ sắc hoa và nghệ thuật gói lụa Pháp từ nghệ nhân FLEURÉ.
+    </p>
+  </div>
+
+  <!-- Dải 5 tab danh mục cuộn ngang mượt (không wrap, giữ lề 16px hai đầu) -->
+  <div class="category-tabs-scroll scrollbar-clean" role="group" aria-label="Danh mục bài viết">
+    <div class="category-tabs-track">
+      @for (category of categories; track category) {
+        <button
+          type="button"
+          class="category-tab-btn"
+          [class.is-active]="selectedCategory() === category"
+          [attr.aria-pressed]="selectedCategory() === category"
+          (click)="selectCategory(category)"
+        >
+          {{ category }}
+        </button>
+      }
+    </div>
+  </div>
+</header>
+
+<div class="posts-body">
+  <div class="atelier-container">
+    <!-- Thanh cảnh báo lỗi nhẹ khi đồng bộ bài viết từ MongoDB gián đoạn -->
+    @if (atelier.postsError(); as errorMessage) {
+      <div class="posts-error-banner" role="alert">
+        <div class="posts-error-content">
+          <app-icon name="alert-circle" [size]="18" class="posts-error-icon" />
+          <p class="posts-error-text">{{ errorMessage }}</p>
+        </div>
+        <button
+          type="button"
+          class="posts-retry-btn"
+          (click)="retryLoadPosts()"
+          [disabled]="atelier.postsLoading()"
+        >
+          <app-icon name="rotate-ccw" [size]="14" />
+          <span>{{ atelier.postsLoading() ? 'Đang tải...' : 'Thử tải lại' }}</span>
+        </button>
+      </div>
+    }
+
+    <!-- Trạng thái đồng bộ nền nhẹ nhàng khi tải danh sách bài mới -->
+    @if (atelier.postsLoading() && atelier.posts().length === 0) {
+      <div class="posts-skeleton-list" aria-busy="true" aria-label="Đang tải bài viết">
+        @for (slot of [1, 2]; track slot) {
+          <div class="post-skeleton-card">
+            <div class="skeleton-cover"></div>
+            <div class="skeleton-body">
+              <div class="skeleton-line skeleton-line--short"></div>
+              <div class="skeleton-line skeleton-line--title"></div>
+              <div class="skeleton-line"></div>
+            </div>
+          </div>
+        }
+      </div>
+    }
+
+    <!-- Khung đọc bài viết đầy đủ mở ngay trên đầu danh sách (hỗ trợ phím Escape để đóng) -->
+    @if (activePost(); as post) {
+      <article id="post-reader-top" class="post-reader" aria-labelledby="reader-post-title">
+        <div class="reader-topbar">
+          <button type="button" class="reader-back-btn" (click)="closePost()">
+            <app-icon name="chevron-left" [size]="16" />
+            <span>Quay lại danh sách</span>
+          </button>
+
+          <button
+            type="button"
+            class="reader-close-btn"
+            (click)="closePost()"
+            aria-label="Đóng bài viết"
+            title="Đóng (Esc)"
+          >
+            <app-icon name="x" [size]="18" />
+          </button>
+        </div>
+
+        <figure class="reader-cover">
+          <img
+            [src]="post.image"
+            [alt]="post.title"
+            width="800"
+            height="500"
+            loading="eager"
+            decoding="async"
+            class="reader-cover-img"
+          />
+        </figure>
+
+        <div class="reader-meta-row">
+          <span class="post-category-badge">{{ post.category }}</span>
+          <span class="post-meta-item tabular-nums">
+            <app-icon name="clock" [size]="14" />
+            <span>{{ post.readTimeMinutes }} phút đọc</span>
+          </span>
+          <span class="post-meta-item tabular-nums">
+            {{ formatPublishedDate(post.publishedAt) }}
+          </span>
+        </div>
+
+        <h2 id="reader-post-title" class="reader-title">{{ post.title }}</h2>
+
+        <p class="reader-author">
+          <app-icon name="book-open" [size]="14" />
+          <span>{{ post.author }}</span>
+        </p>
+
+        <div class="reader-paragraphs">
+          @for (paragraph of post.content; track $index) {
+            <p class="reader-paragraph">{{ paragraph }}</p>
+          }
+        </div>
+
+        <!-- Hộp Mẹo giữ hoa tươi nền --bg-cream-alt viền trái Ruby 3px -->
+        @if (post.careTip) {
+          <aside class="care-tip-box" aria-label="Mẹo giữ hoa tươi">
+            <p class="care-tip-heading">
+              <app-icon name="droplets" [size]="16" />
+              <span>Mẹo giữ hoa tươi</span>
+            </p>
+            <p class="care-tip-text">{{ post.careTip }}</p>
+          </aside>
+        }
+
+        <!-- Thẻ Bó Hoa Liên Quan dẫn sang chi tiết hoặc thêm trực tiếp vào giỏ -->
+        @if (relatedProduct(); as relProduct) {
+          <section class="related-product-card" aria-label="Bó hoa liên quan">
+            <p class="related-eyebrow">
+              <app-icon name="sparkles" [size]="14" />
+              <span>Bó hoa liên quan trong bài viết</span>
+            </p>
+
+            <div class="related-product-main">
+              <a
+                [routerLink]="['/product', relProduct.slug]"
+                class="related-thumb-link"
+                [attr.aria-label]="'Xem chi tiết ' + relProduct.name"
+              >
+                <img
+                  [src]="relProduct.image"
+                  [alt]="relProduct.name"
+                  width="160"
+                  height="160"
+                  loading="lazy"
+                  decoding="async"
+                  class="related-thumb"
+                />
+              </a>
+
+              <div class="related-info">
+                <a [routerLink]="['/product', relProduct.slug]" class="related-name">
+                  {{ relProduct.name }}
+                </a>
+                <div class="related-price-row">
+                  <strong class="related-price tabular-nums">
+                    {{ atelier.formatVnd(relProduct.priceValue) }}
+                  </strong>
+                  @if (relProduct.oldPriceValue > relProduct.priceValue) {
+                    <span class="related-old-price tabular-nums">
+                      {{ atelier.formatVnd(relProduct.oldPriceValue) }}
+                    </span>
+                  }
+                </div>
+              </div>
+            </div>
+
+            <div class="related-actions">
+              <a [routerLink]="['/product', relProduct.slug]" class="related-detail-link">
+                <span>Xem chi tiết</span>
+              </a>
+
+              <button
+                type="button"
+                class="related-cart-btn"
+                (click)="atelier.addToCart(relProduct)"
+                [attr.aria-label]="'Thêm ' + relProduct.name + ' vào giỏ hoa'"
+              >
+                <app-icon name="shopping-bag" [size]="15" />
+                <span>Thêm vào giỏ</span>
+              </button>
+            </div>
+          </section>
+        }
+      </article>
+    }
+
+    <!-- Danh sách thẻ bài viết 1 cột gọn mắt trên khung 430px -->
+    <section class="posts-list-section" aria-labelledby="posts-list-heading">
+      <div class="posts-list-header">
+        <h2 id="posts-list-heading" class="posts-list-heading">
+          {{ activePost() ? 'Bài viết cùng cẩm nang' : selectedCategory() }}
+        </h2>
+        <span class="posts-count tabular-nums">{{ filteredPosts().length }} bài viết</span>
+      </div>
+
+      <div class="posts-list">
+        @for (post of filteredPosts(); track post.id) {
+          @let isReading = activePostId() === post.id;
+          <article class="post-card" [class.is-reading]="isReading">
+            <button
+              type="button"
+              class="post-cover-trigger"
+              (click)="openPost(post)"
+              [attr.aria-label]="'Mở đọc bài viết ' + post.title"
+            >
+              <img
+                [src]="post.image"
+                [alt]="post.title"
+                width="800"
+                height="500"
+                loading="lazy"
+                decoding="async"
+                class="post-cover-img"
+              />
+              @if (isReading) {
+                <span class="post-reading-pill">Đang đọc</span>
+              }
+            </button>
+
+            <div class="post-card-body">
+              <div class="post-card-meta">
+                <span class="post-category-badge">{{ post.category }}</span>
+                <span class="post-meta-item tabular-nums">
+                  <app-icon name="clock" [size]="13" />
+                  <span>{{ post.readTimeMinutes }} phút đọc</span>
+                </span>
+              </div>
+
+              <h3 class="post-card-title">
+                <button type="button" class="post-title-trigger" (click)="openPost(post)">
+                  {{ post.title }}
+                </button>
+              </h3>
+
+              <p class="post-card-excerpt">{{ post.excerpt }}</p>
+
+              <div class="post-card-footer">
+                <span class="post-card-author" [attr.title]="post.author">{{ post.author }}</span>
+                <button type="button" class="post-read-btn" (click)="openPost(post)">
+                  <span>Đọc bài viết</span>
+                  <app-icon name="arrow-right" [size]="15" />
+                </button>
+              </div>
+            </div>
+          </article>
+        } @empty {
+          <div class="posts-empty" role="status">
+            <p class="posts-empty-text">
+              Chưa có bài viết nào trong chuyên mục "{{ selectedCategory() }}".
+            </p>
+            @if (selectedCategory() !== 'Tất cả') {
+              <button type="button" class="posts-empty-reset" (click)="resetCategory()">
+                <app-icon name="rotate-ccw" [size]="15" />
+                <span>Xem tất cả bài viết</span>
+              </button>
+            }
+          </div>
+        }
+      </div>
+    </section>
+  </div>
+</div>

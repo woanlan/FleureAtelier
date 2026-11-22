@@ -67,16 +67,23 @@
         </ul>
       </div>
 
-      <!-- Cột 3: Liên kết neo điều hướng nhanh -->
+      <!-- Cột 3: Liên kết điều hướng đa trang cuối chân trang -->
       <nav class="footer-col footer-nav-col" aria-label="Điều hướng nhanh cuối trang">
         <h3 class="footer-col-title">Khám phá</h3>
         <ul class="footer-nav-list">
-          @for (link of quickLinks; track link.href) {
+          @for (link of quickLinks; track link.label) {
             <li>
-              <a [href]="link.href" class="footer-nav-link" (click)="scrollToSection($event, link.href)">
-                <span>{{ link.label }}</span>
-                <app-icon name="arrow-up-right" [size]="15" />
-              </a>
+              @if (link.fragment) {
+                <a [routerLink]="[link.route]" [fragment]="link.fragment" class="footer-nav-link">
+                  <span>{{ link.label }}</span>
+                  <app-icon name="arrow-up-right" [size]="15" />
+                </a>
+              } @else {
+                <a [routerLink]="[link.route]" class="footer-nav-link">
+                  <span>{{ link.label }}</span>
+                  <app-icon name="arrow-up-right" [size]="15" />
+                </a>
+              }
             </li>
           }
         </ul>

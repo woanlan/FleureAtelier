@@ -1,0 +1,167 @@
+<!-- Hero Flash Sale nền Ruby đậm (chuẩn khung Mobile 430px) -->
+<section
+  class="promo-hero surface-espresso"
+  data-surface="dark"
+  aria-labelledby="promotions-page-heading"
+>
+  <div class="atelier-container">
+    <p class="promo-eyebrow">
+      <app-icon name="flame" [size]="15" />
+      <span>FLEURÉ Flash Sale</span>
+    </p>
+
+    <h1 id="promotions-page-heading" class="promo-heading">Ngọt ngào ưu đãi cuối tuần.</h1>
+
+    <p class="promo-lead">
+      Giảm trực tiếp đến {{ maxDiscountPercent() }}% các mẫu hoa tươi Đà Lạt kèm bộ mã ưu đãi áp
+      dụng ngay tại Giỏ hoa.
+    </p>
+
+    @let clock = countdown();
+    <div
+      class="countdown-panel"
+      role="timer"
+      aria-live="off"
+      [attr.aria-label]="
+        'Thời gian ưu đãi còn lại ' +
+        clock.hours +
+        ' giờ ' +
+        clock.minutes +
+        ' phút ' +
+        clock.seconds +
+        ' giây'
+      "
+    >
+      <div class="countdown-label-row">
+        <app-icon name="clock" [size]="14" />
+        <span>Kết thúc đợt ưu đãi sau</span>
+      </div>
+
+      <div class="countdown-grid tabular-nums" aria-hidden="true">
+        <div class="countdown-cell">
+          <span class="countdown-value">{{ clock.hours }}</span>
+          <span class="countdown-unit">Giờ</span>
+        </div>
+        <span class="countdown-sep">:</span>
+        <div class="countdown-cell">
+          <span class="countdown-value">{{ clock.minutes }}</span>
+          <span class="countdown-unit">Phút</span>
+        </div>
+        <span class="countdown-sep">:</span>
+        <div class="countdown-cell">
+          <span class="countdown-value">{{ clock.seconds }}</span>
+          <span class="countdown-unit">Giây</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Danh sách 3 thẻ Mã Ưu Đãi xếp dọc gọn gàng trong 430px -->
+<section class="voucher-section" aria-labelledby="vouchers-heading">
+  <div class="atelier-container">
+    <header class="section-header">
+      <p class="section-eyebrow">Mã giảm giá độc quyền</p>
+      <h2 id="vouchers-heading" class="section-title">Chọn mã ưu đãi FLEURÉ</h2>
+      <p class="section-subtitle">
+        Sao chép mã hoặc chuyển thẳng sang Giỏ hoa để hệ thống tự động điền mã cho bạn.
+      </p>
+    </header>
+
+    <div class="voucher-list">
+      @for (voucher of atelier.vouchers; track voucher.code) {
+        @let isCopied = copiedCode() === voucher.code;
+        <article class="voucher-card">
+          <div class="voucher-head">
+            <div class="voucher-icon-box" aria-hidden="true">
+              <app-icon name="ticket" [size]="20" />
+            </div>
+
+            <div class="voucher-info">
+              <div class="voucher-code-row">
+                <strong class="voucher-code">{{ voucher.code }}</strong>
+                <span class="voucher-badge">{{ voucher.label }}</span>
+              </div>
+              <p class="voucher-desc">{{ voucher.description }}</p>
+            </div>
+          </div>
+
+          <div class="voucher-actions">
+            <button
+              type="button"
+              class="voucher-copy-btn"
+              [class.is-copied]="isCopied"
+              (click)="copyVoucher(voucher.code)"
+              [attr.aria-label]="
+                isCopied ? 'Đã sao chép mã ' + voucher.code : 'Sao chép mã ' + voucher.code
+              "
+            >
+              <app-icon [name]="isCopied ? 'check' : 'copy'" [size]="15" />
+              <span>{{ isCopied ? 'Đã sao chép' : 'Sao chép' }}</span>
+            </button>
+
+            <a
+              routerLink="/cart"
+              [queryParams]="{ voucher: voucher.code }"
+              class="voucher-apply-link"
+              [attr.aria-label]="'Dùng mã ' + voucher.code + ' ở Giỏ hoa'"
+            >
+              <span>Dùng ở Giỏ hoa</span>
+              <app-icon name="arrow-right" [size]="15" />
+            </a>
+          </div>
+        </article>
+      }
+    </div>
+  </div>
+</section>
+
+<!-- Bộ chip lọc & Lưới sản phẩm giảm giá 2 cột -->
+<section class="sale-catalog-section" aria-labelledby="sale-catalog-heading">
+  <div class="atelier-container">
+    <header class="sale-catalog-header">
+      <div class="sale-heading-group">
+        <p class="section-eyebrow">Ưu đãi áp dụng trực tiếp</p>
+        <h2 id="sale-catalog-heading" class="section-title">Hoa tươi đang giảm giá</h2>
+      </div>
+      <span class="sale-count tabular-nums">{{ filteredSaleProducts().length }} mẫu</span>
+    </header>
+  </div>
+
+  <!-- Hàng 3 chip lọc cuộn ngang mượt không bọc dòng, giữ lề 16px hai đầu -->
+  <div class="promo-filter-scroll scrollbar-clean" role="group" aria-label="Lọc sản phẩm ưu đãi">
+    <div class="promo-filter-track">
+      @for (option of filterOptions; track option.id) {
+        <button
+          type="button"
+          class="promo-filter-chip"
+          [class.is-active]="activeFilter() === option.id"
+          [attr.aria-pressed]="activeFilter() === option.id"
+          (click)="selectFilter(option.id)"
+        >
+          {{ option.label }}
+        </button>
+      }
+    </div>
+  </div>
+
+  <div class="atelier-container">
+    <div class="promo-product-grid">
+      @for (item of filteredSaleProducts(); track item.id) {
+        <app-product-card
+          [product]="item"
+          (addToCart)="atelier.addToCart($event)"
+          (quickOrder)="atelier.openOrderForApiProduct($event)"
+        />
+      } @empty {
+        <div class="promo-empty" role="status">
+          <p class="promo-empty-text">Chưa có mẫu hoa nào phù hợp với mức lọc ưu đãi này.</p>
+          <button type="button" class="promo-empty-reset" (click)="resetFilter()">
+            <app-icon name="rotate-ccw" [size]="15" />
+            <span>Xem tất cả ưu đãi</span>
+          </button>
+        </div>
+      }
+    </div>
+  </div>
+</section>

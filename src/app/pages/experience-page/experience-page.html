@@ -1,0 +1,245 @@
+<div class="experience-page">
+  <!-- Đầu trang nền Ruby đậm đặc trưng Atelier FLEURÉ -->
+  <section class="exp-hero surface-espresso" data-surface="dark">
+    <div class="atelier-container exp-hero-inner">
+      <p class="exp-eyebrow">
+        <app-icon name="film" [size]="15" />
+        <span>FLEURÉ Atelier Video</span>
+      </p>
+
+      <h1 class="exp-title">Nghệ Thuật Bó Hoa Chuẩn Pháp.</h1>
+
+      <p class="exp-lead">
+        Theo chân nghệ nhân FLEURÉ khám phá quy trình chọn hoa sớm Đà Lạt, kỹ thuật bó xoắn ốc và bí
+        quyết giữ dáng hoa tươi bền sắc tại nhà.
+      </p>
+    </div>
+
+    <!-- Dải 4 tab danh mục cuộn ngang mượt (lề đặt trên hàng trong theo quy chuẩn R6) -->
+    <div class="exp-tabs-scroller scrollbar-clean" role="group" aria-label="Lọc video theo danh mục">
+      <div class="exp-tabs-track">
+        @for (category of categories; track category) {
+          <button
+            type="button"
+            class="exp-tab-pill"
+            [class.is-active]="selectedCategory() === category"
+            [attr.aria-pressed]="selectedCategory() === category"
+            (click)="selectCategory(category)"
+          >
+            {{ category }}
+          </button>
+        }
+      </div>
+    </div>
+  </section>
+
+  <!-- Nội dung chính 1 cột chuẩn khung di động 430px -->
+  <div class="atelier-container exp-body">
+    <!-- Thông báo nhẹ khi đang đồng bộ lại hoặc rơi về bộ video lưu sẵn -->
+    @if (atelier.experiencesLoading()) {
+      <p class="exp-sync-note" role="status" aria-live="polite">
+        <app-icon name="sparkles" [size]="15" />
+        <span>Đang đồng bộ danh sách video mới nhất từ FLEURÉ Atelier...</span>
+      </p>
+    } @else if (atelier.experiencesError(); as errorMsg) {
+      <div class="exp-error-banner" role="status">
+        <div class="exp-error-copy">
+          <app-icon name="alert-circle" [size]="17" />
+          <span>{{ errorMsg }}</span>
+        </div>
+        <button type="button" class="exp-retry-btn" (click)="retryLoadExperiences()">
+          <app-icon name="rotate-ccw" [size]="14" />
+          <span>Thử lại</span>
+        </button>
+      </div>
+    }
+
+    <!-- Trình phát video chính + 3 bước hướng dẫn + Thẻ bó hoa liên kết -->
+    @if (activeVideo(); as video) {
+      <section class="exp-player-card" aria-label="Trình phát video trải nghiệm">
+        <div class="exp-video-frame surface-espresso" data-surface="dark">
+          <video
+            #atelierVideo
+            class="exp-video-el"
+            controls
+            playsinline
+            preload="metadata"
+            [src]="video.videoUrl"
+            [poster]="video.posterImage"
+            [attr.aria-label]="video.title"
+          ></video>
+        </div>
+
+        <div class="exp-player-content">
+          <div class="exp-meta-bar">
+            <span class="exp-category-chip">{{ video.category }}</span>
+
+            <div class="exp-stats-group tabular-nums">
+              <span class="exp-stat-item">
+                <app-icon name="clock" [size]="14" />
+                <span>{{ video.duration }}</span>
+              </span>
+              <span class="exp-stat-item">
+                <app-icon name="eye" [size]="14" />
+                <span>{{ getDisplayViews(video) | number: '1.0-0' }} lượt xem</span>
+              </span>
+            </div>
+          </div>
+
+          <h2 class="exp-episode-title">{{ video.title }}</h2>
+          <p class="exp-episode-subtitle">{{ video.subtitle }}</p>
+
+          <!-- Danh sách 3 bước hướng dẫn đánh số 01, 02, 03 -->
+          @if (video.steps.length > 0) {
+            <div class="exp-steps-block">
+              <h3 class="exp-block-heading">
+                <app-icon name="sparkles" [size]="15" />
+                <span>Các bước thực hiện cùng nghệ nhân</span>
+              </h3>
+
+              <ol class="exp-steps-list">
+                @for (step of video.steps; track $index) {
+                  <li class="exp-step-item">
+                    <span class="exp-step-num tabular-nums" aria-hidden="true">
+                      {{ formatStepIndex($index) }}
+                    </span>
+                    <p class="exp-step-text">{{ step }}</p>
+                  </li>
+                }
+              </ol>
+            </div>
+          }
+
+          <!-- Thẻ bó hoa liên kết xuất hiện trong tập video -->
+          @if (linkedProduct(); as product) {
+            <aside class="linked-bouquet-card" aria-label="Bó hoa liên kết trong video">
+              <p class="linked-eyebrow">Bó hoa trong video</p>
+
+              <div class="linked-top-row">
+                <a
+                  class="linked-thumb-link"
+                  [routerLink]="['/product', product.slug]"
+                  [attr.aria-label]="'Xem chi tiết ' + product.name"
+                >
+                  <img
+                    class="linked-thumb"
+                    [src]="product.image"
+                    [alt]="product.name"
+                    width="72"
+                    height="72"
+                    loading="lazy"
+                    decoding="async"
+                  />
+                </a>
+
+                <div class="linked-info">
+                  <span class="linked-category">{{ product.category }}</span>
+                  <h3 class="linked-name">
+                    <a [routerLink]="['/product', product.slug]">{{ product.name }}</a>
+                  </h3>
+                  <strong class="linked-price tabular-nums">
+                    {{ atelier.formatVnd(product.priceValue) }}
+                  </strong>
+                </div>
+              </div>
+
+              <div class="linked-actions">
+                <button
+                  type="button"
+                  class="linked-btn linked-btn--primary"
+                  (click)="addLinkedProductToCart(product)"
+                >
+                  <app-icon name="shopping-bag" [size]="16" />
+                  <span>Thêm vào giỏ</span>
+                </button>
+
+                <a
+                  class="linked-btn linked-btn--outline"
+                  [routerLink]="['/product', product.slug]"
+                >
+                  <span>Xem chi tiết</span>
+                  <app-icon name="arrow-up-right" [size]="16" />
+                </a>
+              </div>
+            </aside>
+          }
+        </div>
+      </section>
+    } @else {
+      <!-- Trạng thái rỗng khi danh mục lọc chưa có video -->
+      <section class="exp-empty-card" aria-live="polite">
+        <div class="exp-empty-icon">
+          <app-icon name="film" [size]="26" />
+        </div>
+        <h2 class="exp-empty-title">Chưa có video trong mục này</h2>
+        <p class="exp-empty-desc">
+          Các thước phim mới của chuyên mục “{{ selectedCategory() }}” đang được nghệ nhân FLEURÉ
+          biên tập. Bạn có thể xem toàn bộ tập phát sóng hiện có.
+        </p>
+        <button
+          type="button"
+          class="exp-reset-btn"
+          (click)="selectCategory('Tất cả')"
+        >
+          <span>Xem tất cả video</span>
+        </button>
+      </section>
+    }
+
+    <!-- Danh sách phát các tập bên dưới (1 cột 430px) -->
+    @if (filteredVideos().length > 0) {
+      <section class="exp-playlist-section" aria-label="Danh sách phát video Atelier">
+        <div class="playlist-header">
+          <h2 class="playlist-heading">Danh sách phát Atelier</h2>
+          <span class="playlist-count tabular-nums">{{ filteredVideos().length }} tập</span>
+        </div>
+
+        <div class="playlist-list">
+          @for (item of filteredVideos(); track item.id) {
+            @let isCurrent = activeVideo()?.id === item.id;
+
+            <button
+              type="button"
+              class="playlist-card"
+              [class.is-active]="isCurrent"
+              [attr.aria-current]="isCurrent ? 'true' : null"
+              (click)="selectVideo(item.id)"
+            >
+              <span class="playlist-thumb-wrap">
+                <img
+                  class="playlist-thumb"
+                  [src]="item.posterImage"
+                  [alt]="item.title"
+                  width="96"
+                  height="64"
+                  loading="lazy"
+                  decoding="async"
+                />
+                <span class="playlist-play-badge" aria-hidden="true">
+                  <app-icon name="play" [size]="12" />
+                </span>
+                <span class="playlist-duration tabular-nums">{{ item.duration }}</span>
+              </span>
+
+              <span class="playlist-info">
+                <span class="playlist-meta-top">
+                  <span class="playlist-category">{{ item.category }}</span>
+                  @if (isCurrent) {
+                    <span class="playlist-now-badge">Đang phát</span>
+                  }
+                </span>
+
+                <span class="playlist-title">{{ item.title }}</span>
+
+                <span class="playlist-views tabular-nums">
+                  <app-icon name="eye" [size]="13" />
+                  <span>{{ getDisplayViews(item) | number: '1.0-0' }} lượt xem</span>
+                </span>
+              </span>
+            </button>
+          }
+        </div>
+      </section>
+    }
+  </div>
+</div>

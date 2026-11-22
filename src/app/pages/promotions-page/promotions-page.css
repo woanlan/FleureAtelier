@@ -1,0 +1,435 @@
+/* ==========================================================================
+   PROMOTIONS PAGE — TRANG KHUYẾN MÃI & FLASH SALE KHUNG MOBILE 430PX (FLEURÉ)
+   Thiết kế chuẩn 375px–430px, không tràn ngang, không media query Desktop
+   ========================================================================== */
+
+:host {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  background-color: var(--bg-cream);
+}
+
+/* ==========================================================================
+   1. HERO FLASH SALE NỀN RUBY ĐẬM (SURFACE-ESPRESSO)
+   ========================================================================== */
+
+.promo-hero {
+  background-color: var(--bg-espresso);
+  color: var(--text-on-dark);
+  padding-block: 1.5rem 1.75rem;
+  border-bottom: 1px solid var(--gold-line);
+}
+
+.promo-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  margin-bottom: 0.625rem;
+  padding: 0.25rem 0.625rem;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--gold-line);
+  background-color: var(--bg-espresso-card);
+  color: var(--gold-metallic);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  line-height: 1.25;
+}
+
+.promo-heading {
+  font-family: var(--font-serif);
+  font-size: 1.875rem;
+  font-weight: 700;
+  line-height: 1.18;
+  color: var(--text-on-dark);
+  text-wrap: balance;
+  margin-bottom: 0.625rem;
+}
+
+.promo-lead {
+  font-size: 0.875rem;
+  line-height: 1.58;
+  color: var(--text-on-dark-muted);
+  text-wrap: pretty;
+  margin-bottom: 1.125rem;
+}
+
+/* --- Đồng hồ đếm ngược trực tiếp (tabular-nums chống nhảy bố cục) --- */
+.countdown-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 0.625rem;
+  padding: 0.875rem 1rem;
+  border-radius: var(--radius-md);
+  background-color: var(--bg-espresso-card);
+  border: 1px solid var(--gold-line);
+}
+
+.countdown-label-row {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--gold-metallic);
+  letter-spacing: 0.03em;
+}
+
+.countdown-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.countdown-cell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.125rem;
+  padding: 0.5rem 0.25rem;
+  border-radius: var(--radius-sm);
+  background-color: var(--bg-espresso);
+  border: 1px solid var(--gold-line);
+  min-width: 0;
+}
+
+.countdown-value {
+  font-family: var(--font-sans);
+  font-size: 1.5rem;
+  font-weight: 700;
+  line-height: 1.1;
+  color: var(--text-on-dark);
+  letter-spacing: 0.04em;
+}
+
+.countdown-unit {
+  font-size: 0.75rem;
+  font-weight: 500;
+  line-height: 1.2;
+  color: var(--text-on-dark-muted);
+}
+
+.countdown-sep {
+  font-size: 1.375rem;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--gold-metallic);
+  text-align: center;
+}
+
+/* ==========================================================================
+   2. KHU VỰC 3 THẺ MÃ ƯU ĐÃI XẾP DỌC (FLEURE20, YEUHOA15, FREESHIP60)
+   ========================================================================== */
+
+.voucher-section {
+  padding-block: 1.5rem 1.75rem;
+  background-color: var(--bg-cream);
+}
+
+.section-header {
+  margin-bottom: 1rem;
+}
+
+.section-eyebrow {
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--gold-accent-ink);
+  margin-bottom: 0.25rem;
+}
+
+.section-title {
+  font-family: var(--font-serif);
+  font-size: 1.375rem;
+  font-weight: 700;
+  line-height: 1.24;
+  color: var(--text-title);
+}
+
+.section-subtitle {
+  margin-top: 0.375rem;
+  font-size: 0.875rem;
+  line-height: 1.55;
+  color: var(--ink-secondary);
+  text-wrap: pretty;
+}
+
+.voucher-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.voucher-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.875rem;
+  padding: 1rem;
+  border-radius: var(--radius-md);
+  background-color: var(--surface-card);
+  border: 1px solid var(--border-subtle);
+  transition: border-color 180ms var(--ease-editorial);
+}
+
+.voucher-card:hover {
+  border-color: var(--border-strong);
+}
+
+.voucher-head {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  min-width: 0;
+}
+
+.voucher-icon-box {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  flex-shrink: 0;
+  border-radius: var(--radius-sm);
+  background-color: var(--primary-light);
+  color: var(--primary);
+  border: 1px solid var(--border-subtle);
+}
+
+.voucher-info {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.voucher-code-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 0.25rem;
+}
+
+.voucher-code {
+  font-family: var(--font-sans);
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  color: var(--text-title);
+  line-height: 1.25;
+}
+
+.voucher-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.15rem 0.5rem;
+  border-radius: var(--radius-pill);
+  background-color: var(--primary-light);
+  color: var(--gold-accent-ink);
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1.25;
+}
+
+.voucher-desc {
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: var(--ink-secondary);
+  text-wrap: pretty;
+}
+
+.voucher-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.5rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--border-subtle);
+}
+
+.voucher-copy-btn,
+.voucher-apply-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.375rem;
+  min-width: 0;
+  min-height: 44px;
+  padding: 0.5rem 0.625rem;
+  border-radius: var(--radius-pill);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  line-height: 1.2;
+  white-space: nowrap;
+  transition:
+    background-color 180ms var(--ease-editorial),
+    border-color 180ms var(--ease-editorial),
+    color 180ms var(--ease-editorial);
+}
+
+.voucher-copy-btn {
+  border: 1px solid var(--border-strong);
+  background-color: var(--surface-elevated);
+  color: var(--ink-primary);
+}
+
+.voucher-copy-btn:hover {
+  background-color: var(--primary-light);
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+.voucher-copy-btn.is-copied {
+  background-color: var(--success-bg);
+  border-color: var(--success-border);
+  color: var(--success);
+}
+
+.voucher-apply-link {
+  border: 1px solid transparent;
+  background-color: var(--primary);
+  color: var(--primary-foreground);
+}
+
+.voucher-apply-link:hover {
+  background-color: var(--primary-hover);
+}
+
+/* ==========================================================================
+   3. CHIP LỌC & LƯỚI SẢN PHẨM GIẢM GIÁ 2 CỘT
+   ========================================================================== */
+
+.sale-catalog-section {
+  padding-block: 1.5rem 2.25rem;
+  background-color: var(--bg-cream-alt);
+  border-top: 1px solid var(--border-subtle);
+}
+
+.sale-catalog-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 0.875rem;
+}
+
+.sale-heading-group {
+  min-width: 0;
+}
+
+.sale-count {
+  flex-shrink: 0;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--ink-muted);
+  padding-bottom: 0.2rem;
+}
+
+/* Dải 3 chip lọc xuống hàng tự nhiên để cả 3 lựa chọn luôn hiện trọn trong khung 430px */
+.promo-filter-scroll {
+  overflow: visible;
+  padding-block: 0.25rem;
+  margin-bottom: 0.875rem;
+}
+
+.promo-filter-track {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  align-items: stretch;
+  gap: 0.45rem;
+  width: 100%;
+  padding-inline: var(--gutter-inline, 16px);
+}
+
+.promo-filter-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+  min-height: 44px;
+  padding: 0.45rem 0.5rem;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--border-subtle);
+  background-color: var(--surface-card);
+  color: var(--ink-secondary);
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1.25;
+  text-align: center;
+  transition:
+    background-color 180ms var(--ease-editorial),
+    border-color 180ms var(--ease-editorial),
+    color 180ms var(--ease-editorial);
+}
+
+.promo-filter-chip:hover {
+  border-color: var(--border-strong);
+  color: var(--ink-primary);
+  background-color: var(--surface-elevated);
+}
+
+.promo-filter-chip.is-active {
+  background-color: var(--primary);
+  border-color: var(--primary);
+  color: var(--primary-foreground);
+}
+
+.promo-filter-chip.is-active:hover {
+  background-color: var(--primary-hover);
+  border-color: var(--primary-hover);
+}
+
+/* Lưới 2 cột chuẩn 430px cho <app-product-card /> */
+.promo-product-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+/* Trạng thái rỗng gọn gàng trải đủ 2 cột kèm nút đặt lại bộ lọc */
+.promo-empty {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 2rem 1rem;
+  border-radius: var(--radius-md);
+  background-color: var(--surface-card);
+  border: 1px solid var(--border-subtle);
+  text-align: center;
+}
+
+.promo-empty-text {
+  font-size: 0.875rem;
+  line-height: 1.55;
+  color: var(--ink-muted);
+  text-wrap: pretty;
+}
+
+.promo-empty-reset {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.375rem;
+  min-height: 44px;
+  padding: 0.5rem 1rem;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--border-strong);
+  background-color: var(--surface-elevated);
+  color: var(--ink-primary);
+  font-size: 0.875rem;
+  font-weight: 600;
+  transition:
+    background-color 180ms var(--ease-editorial),
+    border-color 180ms var(--ease-editorial),
+    color 180ms var(--ease-editorial);
+}
+
+.promo-empty-reset:hover {
+  background-color: var(--primary-light);
+  border-color: var(--primary);
+  color: var(--primary);
+}

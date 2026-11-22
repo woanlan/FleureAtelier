@@ -6,34 +6,23 @@ import {
   inject,
   PLATFORM_ID,
 } from '@angular/core';
+import { RouterOutlet } from '@angular/router';
 import { AtelierFooter } from './components/atelier-footer/atelier-footer';
 import { AtelierHeader } from './components/atelier-header/atelier-header';
-import { CustomBouquetStudio } from './components/custom-bouquet-studio/custom-bouquet-studio';
-import { HangingGallery } from './components/hanging-gallery/hanging-gallery';
-import { HeroAtelier } from './components/hero-atelier/hero-atelier';
-import { OccasionShowcase } from './components/occasion-showcase/occasion-showcase';
+import { BottomNav } from './components/bottom-nav/bottom-nav';
 import { OrderDrawer } from './components/order-drawer/order-drawer';
-import { SeasonalCalendar } from './components/seasonal-calendar/seasonal-calendar';
+import { ToastBar } from './components/shared/toast-bar/toast-bar';
 import { AtelierService } from './services/atelier.service';
 
 /**
  * Root Standalone Component của "FLEURÉ — Flower Boutique".
- * Kết nối xuyên suốt 5 phân khu trải nghiệm hoa tươi nghệ thuật cùng Header, Footer,
- * Ngăn kéo đặt hoa + Mã ưu đãi FLEURÉ + Thiệp gấp 3D và bộ tự ẩn thanh cuộn mảnh 4px (evondevKit I18).
+ * Khung ứng dụng Mobile-First 430px căn giữa (kể cả trên Desktop) theo đúng chuẩn ASM 1:
+ * Header + `<router-outlet />` + Footer + BottomNav + Ngăn kéo đặt nhanh Thiệp 3D + Toast Hoàn tác.
  */
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [
-    AtelierHeader,
-    HeroAtelier,
-    HangingGallery,
-    OccasionShowcase,
-    CustomBouquetStudio,
-    SeasonalCalendar,
-    AtelierFooter,
-    OrderDrawer,
-  ],
+  imports: [RouterOutlet, AtelierHeader, AtelierFooter, BottomNav, OrderDrawer, ToastBar],
   templateUrl: './app.html',
   styleUrl: './app.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -51,7 +40,7 @@ export class App {
 
   /**
    * Kích hoạt class `.is-scrolling` trên phần tử đang cuộn (capture phase)
-   * và gỡ sau 700ms đứng yên để thanh cuộn 6px trong `styles.css` tự ẩn mượt (luật I18).
+   * và gỡ sau 700ms đứng yên để thanh cuộn 4px trong `styles.css` tự ẩn mượt (luật I18).
    */
   private setupScrollbarAutohide(): void {
     const hideTimers = new WeakMap<Element, ReturnType<typeof setTimeout>>();

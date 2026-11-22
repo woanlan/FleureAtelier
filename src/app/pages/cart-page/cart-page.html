@@ -1,0 +1,568 @@
+<div class="cart-page">
+  <div class="atelier-container c-col cart-shell">
+    <!-- Đầu trang: đường dẫn breadcrumb + tiêu đề H1 duy nhất + tổng số lượng -->
+    <header class="c-col cart-header">
+      <nav class="cart-breadcrumb" aria-label="Đường dẫn trang">
+        <a routerLink="/" class="breadcrumb-link">Trang chủ</a>
+        <app-icon name="chevron-right" [size]="14" class="breadcrumb-sep" />
+        <span class="breadcrumb-current" aria-current="page">Giỏ hoa</span>
+      </nav>
+
+      <div class="c-between">
+        <h1 class="cart-title">Giỏ Hoa FLEURÉ.</h1>
+        @if (atelier.cartCount() > 0 && !confirmedOrder()) {
+          <span class="cart-qty-pill tabular-nums">{{ atelier.cartCount() }} bó</span>
+        }
+      </div>
+
+      @if (confirmedOrder(); as done) {
+        <p class="cart-subtitle tabular-nums">
+          Đơn hàng #{{ done.orderCode }} đã được tiếp nhận thành công.
+        </p>
+      } @else if (atelier.cartCount() > 0) {
+        <p class="cart-subtitle tabular-nums">
+          {{ atelier.cartCount() }} sản phẩm đang chờ chuẩn bị và giao hỏa tốc 60 phút nội thành
+          TP.HCM.
+        </p>
+      } @else {
+        <p class="cart-subtitle">
+          Gói chút hoa, gửi chút thương — tươi mỗi sáng từ nhà vườn Đà Lạt.
+        </p>
+      }
+    </header>
+
+    <!-- TRẠNG THÁI 3: ĐẶT HÀNG THÀNH CÔNG TRÊN MONGODB -->
+    @if (confirmedOrder(); as order) {
+      <section class="c-col c-card cart-card confirmed-card" aria-live="polite">
+        <div class="c-col confirmed-head">
+          <div class="confirmed-icon-wrap" aria-hidden="true">
+            <app-icon name="shield-check" [size]="26" />
+          </div>
+
+          <span class="status-badge confirmed-db-badge">
+            <app-icon name="check" [size]="14" [strokeWidth]="2.4" />
+            <span>Đã lưu MongoDB</span>
+          </span>
+
+          <h2 class="confirmed-heading">Đặt hoa thành công!</h2>
+          <p class="price-accent confirmed-code tabular-nums">Mã đơn #{{ order.orderCode }}</p>
+        </div>
+
+        <dl class="c-col confirmed-dl">
+          <div class="c-col confirmed-dl-row">
+            <dt class="meta-muted">Người nhận</dt>
+            <dd>{{ order.customer.fullName }}</dd>
+          </div>
+          <div class="c-col confirmed-dl-row">
+            <dt class="meta-muted">Số điện thoại</dt>
+            <dd class="tabular-nums">{{ order.customer.phone }}</dd>
+          </div>
+          <div class="c-col confirmed-dl-row">
+            <dt class="meta-muted">Địa chỉ giao hoa</dt>
+            <dd>{{ order.customer.address }}</dd>
+          </div>
+          @if (order.customer.note) {
+            <div class="c-col confirmed-dl-row">
+              <dt class="meta-muted">Lời chúc / Ghi chú</dt>
+              <dd class="confirmed-note-text">“{{ order.customer.note }}”</dd>
+            </div>
+          }
+          <div class="c-col confirmed-dl-row">
+            <dt class="meta-muted">Trạng thái</dt>
+            <dd class="confirmed-status-val">{{ order.status || 'Đã tiếp nhận' }}</dd>
+          </div>
+        </dl>
+
+        <div class="c-col confirmed-items-block">
+          <h3 class="confirmed-sub-heading tabular-nums">
+            Bó hoa đã đặt ({{ countOrderQuantity(order) }} bó)
+          </h3>
+
+          <ul class="c-col confirmed-items-list">
+            @for (item of order.items; track item.productId) {
+              <li class="confirmed-item-row">
+                <img
+                  class="confirmed-item-thumb"
+                  [src]="atelier.normalizeAssetUrl(item.image)"
+                  [alt]="item.name"
+                  width="48"
+                  height="48"
+                  loading="lazy"
+                  decoding="async"
+                />
+                <div class="c-col item-grow">
+                  <span class="confirmed-item-name">{{ item.name }}</span>
+                  <span class="meta-muted tabular-nums">
+                    {{ item.priceValue | number: '1.0-0' }}đ × {{ item.quantity }}
+                  </span>
+                </div>
+                <strong class="price-accent confirmed-item-total tabular-nums">
+                  {{ item.priceValue * item.quantity | number: '1.0-0' }}đ
+                </strong>
+              </li>
+            }
+          </ul>
+        </div>
+
+        <dl class="c-col summary-list">
+          <div class="summary-row">
+            <dt>Tạm tính</dt>
+            <dd class="tabular-nums">{{ order.subtotal | number: '1.0-0' }}đ</dd>
+          </div>
+
+          @if (order.discountAmount > 0) {
+            <div class="summary-row">
+              <dt>
+                Giảm giá
+                @if (order.voucherCode) {
+                  ({{ order.voucherCode }})
+                }
+              </dt>
+              <dd class="summary-discount tabular-nums">
+                −{{ order.discountAmount | number: '1.0-0' }}đ
+              </dd>
+            </div>
+          }
+
+          <div class="summary-row">
+            <dt>Phí giao hỏa tốc 60p</dt>
+            <dd class="tabular-nums">
+              @if (order.shippingFee === 0) {
+                <span class="summary-free">Miễn phí</span>
+              } @else {
+                {{ order.shippingFee | number: '1.0-0' }}đ
+              }
+            </dd>
+          </div>
+
+          <div class="summary-row summary-row--total">
+            <dt>Tổng thanh toán</dt>
+            <dd class="summary-total-val tabular-nums">
+              {{ order.grandTotal | number: '1.0-0' }}đ
+            </dd>
+          </div>
+        </dl>
+
+        @if (copiedZalo()) {
+          <p class="c-start-row notice-box is-success" role="status">
+            <app-icon name="check" [size]="16" [strokeWidth]="2.2" />
+            <span>Đã sao chép đơn! Bạn hãy dán gửi tới Zalo FLEURÉ (0909 123 456).</span>
+          </p>
+        }
+
+        <div class="c-col stack-actions">
+          <button type="button" class="btn-primary-full" (click)="copyOrderForZalo(order)">
+            <app-icon name="copy" [size]="18" />
+            <span>Sao chép đơn gửi Zalo</span>
+          </button>
+
+          <a routerLink="/products" class="btn-outline-full">
+            <span>Tiếp tục chọn hoa</span>
+            <app-icon name="arrow-right" [size]="18" />
+          </a>
+        </div>
+      </section>
+
+    <!-- TRẠNG THÁI 1: GIỎ HÀNG TRỐNG -->
+    } @else if (atelier.cartItems().length === 0) {
+      <section class="c-col c-card cart-card empty-cart-card" aria-label="Giỏ hoa trống">
+        <div class="empty-cart-icon" aria-hidden="true">
+          <app-icon name="shopping-bag" [size]="28" />
+        </div>
+
+        <h2 class="empty-cart-title">Giỏ hoa của bạn đang trống</h2>
+        <p class="cart-subtitle">
+          Chọn ngay một thiết kế hoa tươi chuẩn Pháp từ bộ sưu tập FLEURÉ hoặc tự tay phối từng cành
+          hoa Đà Lạt theo cảm xúc riêng.
+        </p>
+
+        <div class="c-col stack-actions empty-actions-gap">
+          <a routerLink="/products" class="btn-primary-full">
+            <span>Khám phá bộ sưu tập</span>
+            <app-icon name="arrow-right" [size]="17" />
+          </a>
+
+          <a routerLink="/" fragment="tu-bo-hoa" class="btn-outline-full">
+            <app-icon name="sparkles" [size]="17" />
+            <span>Tự phối bó hoa riêng</span>
+          </a>
+        </div>
+      </section>
+
+    <!-- TRẠNG THÁI 2: GIỎ HÀNG CÓ SẢN PHẨM (1 CỘT 430PX LIỀN MẠCH) -->
+    } @else {
+      <!-- 1. Thanh tiến độ Freeship 399.000đ -->
+      <section
+        class="c-col c-card freeship-card"
+        [class.is-unlocked]="isFreeShippingUnlocked()"
+        aria-label="Tiến độ miễn phí giao hàng"
+      >
+        <div class="c-start-row">
+          <span class="freeship-icon" aria-hidden="true">
+            <app-icon name="truck" [size]="18" />
+          </span>
+
+          @if (isFreeShippingUnlocked()) {
+            <p class="freeship-copy">
+              <strong>Đã miễn phí giao hỏa tốc 60 phút!</strong> Đơn hoa của bạn đủ điều kiện
+              Freeship nội thành TP.HCM.
+            </p>
+          } @else {
+            <p class="freeship-copy tabular-nums">
+              Thêm <strong>{{ freeShipRemaining() | number: '1.0-0' }}đ</strong> để được miễn phí
+              giao hỏa tốc 60 phút (đơn từ {{ freeShippingThreshold | number: '1.0-0' }}đ).
+            </p>
+          }
+        </div>
+
+        <div
+          class="freeship-track"
+          role="progressbar"
+          [attr.aria-valuenow]="freeShipProgress()"
+          aria-valuemin="0"
+          aria-valuemax="100"
+          [attr.aria-label]="'Tiến độ miễn phí giao hàng ' + freeShipProgress() + '%'"
+        >
+          <div class="freeship-fill" [style.width.%]="freeShipProgress()"></div>
+        </div>
+      </section>
+
+      <!-- 2. Danh sách sản phẩm trong giỏ -->
+      <section aria-label="Danh sách sản phẩm trong giỏ">
+        <ul class="c-col cart-items-list">
+          @for (item of atelier.cartItems(); track item.product.id) {
+            <li class="c-col c-card cart-item-card">
+              <div class="cart-item-top">
+                <a
+                  class="cart-item-thumb-link"
+                  [routerLink]="['/product', item.product.slug]"
+                  [attr.aria-label]="'Xem chi tiết ' + item.product.name"
+                >
+                  <img
+                    class="cart-item-thumb"
+                    [src]="item.product.image"
+                    [alt]="item.product.name"
+                    width="72"
+                    height="72"
+                    loading="lazy"
+                    decoding="async"
+                  />
+                </a>
+
+                <div class="c-col item-grow">
+                  <span class="meta-muted">{{ item.product.category }}</span>
+                  <h2 class="cart-item-name">
+                    <a [routerLink]="['/product', item.product.slug]">{{ item.product.name }}</a>
+                  </h2>
+                  <p class="text-sub tabular-nums">
+                    {{ item.product.priceValue | number: '1.0-0' }}đ / bó
+                  </p>
+                </div>
+
+                <button
+                  type="button"
+                  class="cart-remove-btn"
+                  (click)="atelier.removeCartItem(item.product.id)"
+                  [attr.aria-label]="'Xóa ' + item.product.name + ' khỏi giỏ hoa'"
+                >
+                  <app-icon name="trash-2" [size]="18" />
+                </button>
+              </div>
+
+              <div class="c-between cart-item-bottom">
+                <div
+                  class="qty-stepper"
+                  role="group"
+                  [attr.aria-label]="'Số lượng của ' + item.product.name"
+                >
+                  <button
+                    type="button"
+                    class="qty-btn"
+                    (click)="atelier.updateCartQuantity(item.product.id, -1)"
+                    [attr.aria-label]="'Giảm số lượng ' + item.product.name"
+                  >
+                    <app-icon name="minus" [size]="16" />
+                  </button>
+
+                  <span class="qty-value tabular-nums" aria-live="polite">
+                    {{ item.quantity }}
+                  </span>
+
+                  <button
+                    type="button"
+                    class="qty-btn"
+                    (click)="atelier.updateCartQuantity(item.product.id, 1)"
+                    [attr.aria-label]="'Tăng số lượng ' + item.product.name"
+                  >
+                    <app-icon name="plus" [size]="16" />
+                  </button>
+                </div>
+
+                <strong class="price-accent cart-item-subtotal tabular-nums">
+                  {{ item.product.priceValue * item.quantity | number: '1.0-0' }}đ
+                </strong>
+              </div>
+            </li>
+          }
+        </ul>
+      </section>
+
+      <!-- 3. Khối Mã Ưu Đãi FLEURÉ -->
+      <section class="c-col c-card cart-card" aria-label="Mã ưu đãi FLEURÉ">
+        <div class="c-between">
+          <h2 class="section-heading">
+            <app-icon name="ticket" [size]="18" />
+            <span>Mã ưu đãi FLEURÉ</span>
+          </h2>
+          @if (appliedVoucherCode()) {
+            <button type="button" class="clear-voucher-btn" (click)="clearVoucher()">Gỡ mã</button>
+          }
+        </div>
+
+        <div class="voucher-input-row">
+          <label for="cart-voucher-input" class="sr-only">Nhập mã ưu đãi FLEURÉ</label>
+          <input
+            id="cart-voucher-input"
+            type="text"
+            class="cart-input voucher-input"
+            [value]="voucherInput()"
+            (input)="onVoucherInput($event)"
+            (keydown.enter)="onVoucherEnter($event)"
+            placeholder="Nhập mã ưu đãi"
+            autocomplete="off"
+            autocapitalize="characters"
+          />
+          <button type="button" class="voucher-apply-btn" (click)="applyVoucher()">Áp dụng</button>
+        </div>
+
+        <div class="voucher-chips-grid" role="group" aria-label="Chọn nhanh mã ưu đãi">
+          @for (voucher of atelier.vouchers; track voucher.code) {
+            @let isPicked = appliedVoucherCode() === voucher.code;
+
+            <button
+              type="button"
+              class="c-col voucher-chip"
+              [class.is-active]="isPicked"
+              [attr.aria-pressed]="isPicked"
+              (click)="toggleVoucherChip(voucher.code)"
+            >
+              <span class="voucher-chip-code">{{ voucher.code }}</span>
+              <span class="voucher-chip-label">{{ voucher.label }}</span>
+            </button>
+          }
+        </div>
+
+        @if (voucherFeedback(); as feedback) {
+          <div
+            class="c-start-row notice-box"
+            [class.is-success]="feedback.status === 'success'"
+            [class.is-error]="feedback.status === 'error'"
+            role="status"
+            aria-live="polite"
+          >
+            <app-icon
+              [name]="feedback.status === 'success' ? 'check' : 'alert-circle'"
+              [size]="16"
+              [strokeWidth]="2.1"
+            />
+            <span>{{ feedback.text }}</span>
+          </div>
+        }
+      </section>
+
+      <!-- 4. Bảng tổng tiền thanh toán -->
+      <section class="c-col c-card cart-card" aria-label="Tổng tiền thanh toán">
+        <h2 class="section-heading">Chi tiết thanh toán</h2>
+
+        <dl class="c-col summary-list">
+          <div class="summary-row">
+            <dt>Tạm tính ({{ atelier.cartCount() }} bó)</dt>
+            <dd class="tabular-nums">{{ atelier.cartSubtotal() | number: '1.0-0' }}đ</dd>
+          </div>
+
+          @if (voucherDiscount() > 0) {
+            <div class="summary-row">
+              <dt>Giảm giá ({{ appliedVoucherCode() }})</dt>
+              <dd class="summary-discount tabular-nums">
+                −{{ voucherDiscount() | number: '1.0-0' }}đ
+              </dd>
+            </div>
+          }
+
+          <div class="summary-row">
+            <dt>Phí giao hỏa tốc 60p</dt>
+            <dd class="tabular-nums">
+              @if (shippingFee() === 0) {
+                <span class="summary-free">Miễn phí</span>
+              } @else {
+                {{ shippingFee() | number: '1.0-0' }}đ
+              }
+            </dd>
+          </div>
+
+          <div class="summary-row summary-row--total">
+            <dt>Tổng thanh toán</dt>
+            <dd class="summary-total-val tabular-nums">{{ grandTotal() | number: '1.0-0' }}đ</dd>
+          </div>
+        </dl>
+      </section>
+
+      <!-- 5. Form thông tin nhận hoa & Đặt đơn thật lên MongoDB (`POST /api/orders`) -->
+      <form
+        class="c-col c-card cart-card"
+        (submit)="onSubmitOrder($event)"
+        novalidate
+        aria-label="Thông tin nhận hoa và đặt hàng"
+      >
+        <div class="c-col checkout-intro">
+          <h2 class="section-heading">Thông tin nhận hoa</h2>
+          <p class="text-sub">
+            Nghệ nhân sẽ gọi xác nhận ảnh bó hoa thật trước khi giao hỏa tốc 60 phút.
+          </p>
+        </div>
+
+        <div class="c-col form-field">
+          <label for="cart-fullname" class="form-label">
+            Họ tên người nhận <span class="required-mark" aria-hidden="true">*</span>
+          </label>
+          <input
+            id="cart-fullname"
+            type="text"
+            class="cart-input"
+            [value]="fullName()"
+            (input)="onFullNameInput($event)"
+            placeholder="Ví dụ: Nguyễn Minh Anh"
+            autocomplete="name"
+            required
+          />
+        </div>
+
+        <div class="c-col form-field">
+          <label for="cart-phone" class="form-label">
+            Số điện thoại <span class="required-mark" aria-hidden="true">*</span>
+          </label>
+          <input
+            id="cart-phone"
+            type="tel"
+            inputmode="tel"
+            class="cart-input tabular-nums"
+            [value]="phone()"
+            (input)="onPhoneInput($event)"
+            placeholder="Ví dụ: 0909 123 456"
+            autocomplete="tel"
+            required
+          />
+        </div>
+
+        <div class="c-col form-field">
+          <label for="cart-address" class="form-label">
+            Địa chỉ giao hoa <span class="required-mark" aria-hidden="true">*</span>
+          </label>
+          <input
+            id="cart-address"
+            type="text"
+            class="cart-input"
+            [value]="address()"
+            (input)="onAddressInput($event)"
+            placeholder="Số nhà, đường, phường, quận"
+            autocomplete="street-address"
+            required
+          />
+        </div>
+
+        <div class="c-col form-field">
+          <label for="cart-note" class="form-label">Lời chúc / Ghi chú (tùy chọn)</label>
+          <textarea
+            id="cart-note"
+            rows="3"
+            class="cart-textarea"
+            [value]="note()"
+            (input)="onNoteInput($event)"
+            placeholder="Lời chúc viết tay trên thiệp FLEURÉ hoặc khung giờ mong muốn..."
+          ></textarea>
+        </div>
+
+        @if (validationError(); as err) {
+          <div class="c-start-row notice-box is-error" role="alert">
+            <app-icon name="alert-circle" [size]="18" />
+            <span>{{ err }}</span>
+          </div>
+        } @else if (submitError(); as apiErr) {
+          <div class="c-start-row notice-box is-error" role="alert">
+            <app-icon name="alert-circle" [size]="18" />
+            <span>{{ apiErr }}</span>
+          </div>
+        }
+
+        <button type="submit" class="btn-primary-full btn-submit-order" [disabled]="submitting()">
+          <app-icon [name]="submitting() ? 'clock' : 'send'" [size]="18" />
+          @if (submitting()) {
+            <span>Đang lưu đơn lên MongoDB...</span>
+          } @else {
+            <span class="tabular-nums">
+              Xác nhận đặt hoa · {{ grandTotal() | number: '1.0-0' }}đ
+            </span>
+          }
+        </button>
+
+        <p class="c-start-row meta-muted">
+          <app-icon name="shield-check" [size]="15" />
+          <span>Lưu đơn trực tiếp trên hệ thống MongoDB · Bảo hành hoa tươi 48 giờ.</span>
+        </p>
+      </form>
+    }
+
+    <!-- LỊCH SỬ ĐƠN ĐẶT HOA GẦN NHẤT (`GET /api/orders`) -->
+    <section class="c-card recent-orders-card" aria-label="Lịch sử đơn đặt hoa gần nhất">
+      <button
+        type="button"
+        class="c-between recent-orders-toggle"
+        [attr.aria-expanded]="showRecentOrders()"
+        (click)="toggleRecentOrders()"
+      >
+        <span class="c-inline">
+          <app-icon name="clock" [size]="17" />
+          <span>Xem đơn gần nhất trên hệ thống</span>
+        </span>
+        <app-icon [name]="showRecentOrders() ? 'chevron-left' : 'chevron-right'" [size]="17" />
+      </button>
+
+      @if (showRecentOrders()) {
+        <div class="recent-orders-body" aria-live="polite">
+          @if (atelier.loadingRecentOrders()) {
+            <p class="recent-orders-state">Đang tải danh sách đơn gần nhất từ MongoDB...</p>
+          } @else if (atelier.recentOrders().length === 0) {
+            <p class="recent-orders-state">Chưa có đơn hàng nào được ghi nhận trên hệ thống.</p>
+          } @else {
+            <ul class="c-col recent-orders-list">
+              @for (entry of atelier.recentOrders(); track entry.orderCode) {
+                <li class="c-col recent-order-item">
+                  <div class="c-between">
+                    <strong class="recent-order-code tabular-nums">#{{ entry.orderCode }}</strong>
+                    <span class="status-badge">{{ entry.status || 'Đã tiếp nhận' }}</span>
+                  </div>
+
+                  <p class="c-inline text-sub tabular-nums">
+                    <app-icon name="phone" [size]="13" />
+                    <span>
+                      {{ entry.customer.fullName }} · {{ atelier.maskPhoneNumber(entry.customer.phone) }}
+                    </span>
+                  </p>
+
+                  <div class="c-between">
+                    <span class="meta-muted tabular-nums">
+                      {{ countOrderQuantity(entry) }} bó hoa
+                    </span>
+                    <strong class="price-accent recent-order-total tabular-nums">
+                      {{ entry.grandTotal | number: '1.0-0' }}đ
+                    </strong>
+                  </div>
+                </li>
+              }
+            </ul>
+          }
+        </div>
+      }
+    </section>
+  </div>
+</div>

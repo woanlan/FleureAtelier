@@ -1,27 +1,29 @@
-<!-- Khóa tương tác toàn bộ nền trang bằng [inert] khi ngăn kéo đặt hoa mở -->
+<!-- Khung ứng dụng Mobile-First 430px căn giữa (kể cả trên Desktop) chuẩn yêu cầu ASM 1 -->
 <div
-  class="atelier-page-shell"
+  class="atelier-page-shell website"
   [inert]="atelier.drawerOpen()"
   [attr.inert]="atelier.drawerOpen() ? '' : null"
 >
   <!-- Liên kết bỏ qua điều hướng hỗ trợ người dùng bàn phím & trình đọc màn hình -->
   <a class="skip-link" href="#main-content">Chuyển tới nội dung chính</a>
 
-  <!-- Thanh điều hướng FLEURÉ — Flower Boutique -->
+  <!-- Thanh điều hướng đầu trang FLEURÉ — Flower Boutique -->
   <app-atelier-header />
 
-  <!-- Dòng chảy 5 phân khu trải nghiệm nghệ thuật hoa -->
+  <!-- Khung hiển thị nội dung từng route lazy-loaded -->
   <main id="main-content" class="atelier-main" tabindex="-1">
-    <app-hero-atelier />
-    <app-hanging-gallery />
-    <app-occasion-showcase />
-    <app-custom-bouquet-studio />
-    <app-seasonal-calendar />
+    <router-outlet />
   </main>
 
   <!-- Chân trang thông tin xưởng & liên hệ -->
   <app-atelier-footer />
+
+  <!-- Thanh điều hướng đáy cố định (Mobile Bottom Navigation 430px) -->
+  <app-bottom-nav />
 </div>
 
-<!-- Ngăn kéo đặt hoa kem ấm & Sân khấu thiệp gấp 3D trực tiếp -->
+<!-- Ngăn kéo đặt hoa kem ấm & Thiệp gấp 3D trực tiếp căn theo khung 430px -->
 <app-order-drawer />
+
+<!-- Thanh thông báo Toast nổi kèm nút Hoàn tác khi xóa sản phẩm khỏi giỏ -->
+<app-toast-bar />

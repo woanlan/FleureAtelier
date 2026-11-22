@@ -1,0 +1,81 @@
+@let item = product();
+
+<article class="product-card">
+  <!-- Ảnh bó hoa tỷ lệ 4:5 sắc nét, dẫn thẳng tới trang chi tiết chuẩn SEO /product/:slug -->
+  <a
+    class="card-media-link"
+    [routerLink]="['/product', item.slug]"
+    [attr.aria-label]="'Xem chi tiết ' + item.name"
+  >
+    <img
+      [src]="item.image"
+      [alt]="item.name"
+      width="400"
+      height="500"
+      loading="eager"
+      decoding="async"
+      class="card-img"
+    />
+
+    @if (badgeLabel(); as label) {
+      <span
+        class="card-badge"
+        [class.card-badge--sale]="isSaleBadge()"
+        [class.card-badge--new]="!isSaleBadge()"
+      >
+        {{ label }}
+      </span>
+    }
+  </a>
+
+  <!-- Nội dung mô tả & giá bán định dạng chuẩn bằng DecimalPipe -->
+  <div class="card-body">
+    <div class="card-meta-row">
+      <span class="card-category-tag">{{ item.category }}</span>
+      @if (item.sold > 0) {
+        <span class="card-sold tabular-nums">Đã đặt {{ item.sold }}</span>
+      }
+    </div>
+
+    <h3 class="card-title">
+      <a [routerLink]="['/product', item.slug]" class="card-title-link" [attr.title]="item.name">
+        {{ item.name }}
+      </a>
+    </h3>
+
+    <p class="card-meaning">{{ item.meaning || item.description }}</p>
+
+    <div class="card-price-row">
+      <strong class="card-price tabular-nums">
+        {{ item.priceValue | number: '1.0-0' }}đ
+      </strong>
+      @if (hasOldPrice()) {
+        <span class="card-old-price tabular-nums">
+          {{ item.oldPriceValue | number: '1.0-0' }}đ
+        </span>
+      }
+    </div>
+
+    <div class="card-actions">
+      <button
+        type="button"
+        class="card-add-btn"
+        (click)="onAddToCart()"
+        [attr.aria-label]="'Thêm ' + item.name + ' vào giỏ hoa'"
+      >
+        <app-icon name="shopping-bag" [size]="15" />
+        <span>Thêm giỏ</span>
+      </button>
+
+      <button
+        type="button"
+        class="card-quick-btn"
+        (click)="onQuickOrder()"
+        [attr.aria-label]="'Đặt nhanh kèm thiệp 3D cho ' + item.name"
+        title="Đặt nhanh kèm Thiệp 3D"
+      >
+        <app-icon name="sparkles" [size]="16" />
+      </button>
+    </div>
+  </div>
+</article>

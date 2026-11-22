@@ -1,0 +1,245 @@
+<!-- Trang Chi tiết mẫu hoa FLEURÉ (khung Mobile-First 430px 1 cột xếp dọc) -->
+<section class="detail-page">
+  <div class="atelier-container">
+    @if (loading() && !product()) {
+      <!-- Khung chờ giữ đúng nhịp chiều cao ảnh 4/4.2 tránh giật bố cục (CLS = 0) -->
+      <div class="detail-skeleton" role="status" aria-busy="true" aria-label="Đang tải chi tiết mẫu hoa">
+        <div class="skeleton-bar skeleton-bar--crumb"></div>
+        <div class="skeleton-media"></div>
+        <div class="skeleton-bar skeleton-bar--title"></div>
+        <div class="skeleton-bar skeleton-bar--price"></div>
+        <div class="skeleton-box"></div>
+      </div>
+    } @else if (product(); as item) {
+      <!-- Đường dẫn 3 cấp: Trang chủ › Danh mục › Tên mẫu hoa -->
+      <nav class="detail-breadcrumb" aria-label="Đường dẫn sản phẩm">
+        <ol class="breadcrumb-list">
+          <li class="breadcrumb-item">
+            <a routerLink="/" class="breadcrumb-link">Trang chủ</a>
+          </li>
+          <li class="breadcrumb-item">
+            <app-icon name="chevron-right" [size]="14" class="breadcrumb-sep" />
+            <a [routerLink]="['/category', item.categorySlug]" class="breadcrumb-link">
+              {{ item.category }}
+            </a>
+          </li>
+          <li class="breadcrumb-item breadcrumb-item--current">
+            <app-icon name="chevron-right" [size]="14" class="breadcrumb-sep" />
+            <span class="breadcrumb-current" aria-current="page" [attr.title]="item.name">
+              {{ item.name }}
+            </span>
+          </li>
+        </ol>
+      </nav>
+
+      <!-- Khung ảnh bó hoa tỷ lệ 4 / 4.2 bo tròn --radius-lg + badge góc trái -->
+      <figure class="detail-media-frame">
+        <img
+          [src]="item.image"
+          [alt]="item.name"
+          width="400"
+          height="420"
+          fetchpriority="high"
+          decoding="async"
+          class="detail-media-img"
+        />
+
+        @if (badgeLabel(); as label) {
+          <span
+            class="detail-badge"
+            [class.detail-badge--sale]="isSaleBadge()"
+            [class.detail-badge--new]="!isSaleBadge()"
+          >
+            {{ label }}
+          </span>
+        }
+      </figure>
+
+      <!-- Nhãn danh mục, lượt đã đặt, tiêu đề H1 & giá bán định dạng DecimalPipe -->
+      <header class="detail-header">
+        <div class="detail-meta-row">
+          <a [routerLink]="['/category', item.categorySlug]" class="detail-category-tag">
+            {{ item.category }}
+          </a>
+          @if (item.sold > 0) {
+            <span class="detail-sold tabular-nums">
+              <app-icon name="flame" [size]="14" />
+              <span>Đã đặt {{ item.sold }} bó</span>
+            </span>
+          }
+        </div>
+
+        <h1 class="detail-title">{{ item.name }}</h1>
+
+        <div class="detail-price-row">
+          <strong class="detail-price tabular-nums">
+            {{ item.priceValue | number: '1.0-0' }}đ
+          </strong>
+
+          @if (hasOldPrice()) {
+            <span class="detail-old-price tabular-nums">
+              {{ item.oldPriceValue | number: '1.0-0' }}đ
+            </span>
+          }
+
+          @if (savingsPerItem() > 0) {
+            <span class="detail-savings-pill tabular-nums">
+              Tiết kiệm {{ savingsPerItem() | number: '1.0-0' }}đ
+            </span>
+          }
+        </div>
+      </header>
+
+      <!-- Khối "Ý nghĩa bó hoa" nền --bg-cream-alt + mô tả chi tiết -->
+      <article class="detail-story-card" aria-labelledby="bouquet-meaning-label">
+        <p id="bouquet-meaning-label" class="meaning-eyebrow">
+          <app-icon name="sparkles" [size]="15" />
+          <span>Ý nghĩa bó hoa</span>
+        </p>
+
+        @if (item.meaning) {
+          <p class="meaning-quote">“{{ item.meaning }}”</p>
+        }
+
+        @if (item.description) {
+          <p class="meaning-description">{{ item.description }}</p>
+        }
+      </article>
+
+      <!-- 3 cam kết dịch vụ gọn gàng trong 430px -->
+      <ul class="detail-promises" aria-label="Cam kết dịch vụ FLEURÉ">
+        <li class="promise-item">
+          <span class="promise-icon" aria-hidden="true">
+            <app-icon name="flower-2" [size]="18" />
+          </span>
+          <strong class="promise-title">Hoa Đà Lạt</strong>
+          <span class="promise-sub">Tươi cắt sáng sớm</span>
+        </li>
+
+        <li class="promise-item">
+          <span class="promise-icon" aria-hidden="true">
+            <app-icon name="truck" [size]="18" />
+          </span>
+          <strong class="promise-title">Giao 60 phút</strong>
+          <span class="promise-sub">Hỏa tốc TP.HCM</span>
+        </li>
+
+        <li class="promise-item">
+          <span class="promise-icon" aria-hidden="true">
+            <app-icon name="shield-check" [size]="18" />
+          </span>
+          <strong class="promise-title">Thiệp viết tay</strong>
+          <span class="promise-sub">Gấp nổi 3D tinh tế</span>
+        </li>
+      </ul>
+
+      <!-- Khung chọn số lượng (linkedSignal) + tạm tính live + cụm 3 nút hành động -->
+      <section class="purchase-panel" aria-label="Chọn số lượng và đặt mua">
+        <div class="qty-subtotal-row">
+          <div class="qty-group">
+            <span class="qty-label" id="detail-qty-label">Số lượng</span>
+            <div class="qty-stepper" role="group" aria-labelledby="detail-qty-label">
+              <button
+                type="button"
+                class="qty-step-btn"
+                [disabled]="quantity() <= minQuantity"
+                aria-label="Giảm số lượng"
+                (click)="decreaseQuantity()"
+              >
+                <span class="qty-step-inner" aria-hidden="true">
+                  <app-icon name="minus" [size]="16" />
+                </span>
+              </button>
+
+              <output
+                class="qty-value tabular-nums"
+                aria-live="polite"
+                [attr.aria-label]="'Số lượng hiện tại là ' + quantity()"
+              >
+                {{ quantity() }}
+              </output>
+
+              <button
+                type="button"
+                class="qty-step-btn"
+                [disabled]="quantity() >= maxQuantity"
+                aria-label="Tăng số lượng"
+                (click)="increaseQuantity()"
+              >
+                <span class="qty-step-inner" aria-hidden="true">
+                  <app-icon name="plus" [size]="16" />
+                </span>
+              </button>
+            </div>
+          </div>
+
+          <div class="subtotal-group">
+            <span class="subtotal-label">Tạm tính</span>
+            <strong class="subtotal-value tabular-nums" aria-live="polite">
+              {{ liveSubtotal() | number: '1.0-0' }}đ
+            </strong>
+          </div>
+        </div>
+
+        <div class="action-cluster">
+          <!-- Hàng 1: 2 nút ngang đều nhau — Thêm vào giỏ (outline) + Mua ngay (primary) -->
+          <div class="action-primary-row">
+            <button type="button" class="btn-outline-ruby" (click)="onAddToCart()">
+              <app-icon name="shopping-bag" [size]="16" />
+              <span>Thêm vào giỏ</span>
+            </button>
+
+            <button type="button" class="btn-primary-ruby" (click)="onBuyNow()">
+              <span>Mua ngay</span>
+              <app-icon name="arrow-right" [size]="16" />
+            </button>
+          </div>
+
+          <!-- Hàng 2: Nút full-width đặt nhanh kèm Thiệp gấp 3D -->
+          <button type="button" class="btn-quick-card" (click)="onQuickOrderWithCard()">
+            <app-icon name="sparkles" [size]="16" />
+            <span>Đặt nhanh kèm Thiệp gấp 3D</span>
+          </button>
+        </div>
+      </section>
+
+      <!-- Mục "Có thể bạn cũng thích": lưới 2 cột (2 sản phẩm liên quan) -->
+      @if (relatedProducts().length > 0) {
+        <section class="related-section" aria-labelledby="related-products-heading">
+          <div class="related-header">
+            <h2 id="related-products-heading" class="related-heading">Có thể bạn cũng thích</h2>
+            <a routerLink="/products" class="related-more-link">
+              <span>Xem tất cả</span>
+              <app-icon name="chevron-right" [size]="15" />
+            </a>
+          </div>
+
+          <div class="related-grid">
+            @for (related of relatedProducts(); track related.id) {
+              <app-product-card
+                [product]="related"
+                (addToCart)="atelier.addToCart($event)"
+                (quickOrder)="atelier.openOrderForApiProduct($event)"
+              />
+            }
+          </div>
+        </section>
+      }
+    } @else {
+      <!-- Trạng thái không tìm thấy sản phẩm + lối quay lại /products -->
+      <div class="not-found-card" role="status">
+        <div class="not-found-icon" aria-hidden="true">
+          <app-icon name="flower-2" [size]="28" />
+        </div>
+        <h1 class="not-found-title">Không tìm thấy mẫu hoa này</h1>
+        <p class="not-found-desc">
+          Mẫu hoa bạn đang tìm có thể đã hết mùa hoặc đường dẫn không còn tồn tại tại FLEURÉ.
+        </p>
+        <a routerLink="/products" class="not-found-btn">
+          <app-icon name="chevron-left" [size]="16" />
+          <span>Quay lại bộ sưu tập hoa</span>
+        </a>
+      </div>
+    }
+  </div>
+</section>

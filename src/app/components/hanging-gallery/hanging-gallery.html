@@ -133,9 +133,17 @@
           </span>
         </div>
 
-        <button type="button" class="plaque-cta-btn" (click)="orderActiveBouquet()">
-          Đặt bó này
-        </button>
+        <div class="plaque-cta-actions">
+          <a
+            class="plaque-detail-link"
+            [routerLink]="['/product', atelier.getDetailSlugForBouquet(activeBouquet)]"
+          >
+            Xem chi tiết
+          </a>
+          <button type="button" class="plaque-cta-btn" (click)="orderActiveBouquet()">
+            Đặt bó này
+          </button>
+        </div>
       </div>
     </article>
 

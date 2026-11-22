@@ -1,5 +1,5 @@
 import { isPlatformBrowser } from '@angular/common';
-import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse, HttpParams } from '@angular/common/http';
 import {
   computed,
   DestroyRef,
@@ -9,7 +9,7 @@ import {
   PLATFORM_ID,
   signal,
 } from '@angular/core';
-import { Subscription, timeout } from 'rxjs';
+import { map, Observable, Subscription, tap, timeout } from 'rxjs';
 import { API_BASE_URL } from '../config/api.config';
 import {
   ADDON_OPTIONS,
@@ -18,6 +18,11 @@ import {
   DELIVERY_DAY_OPTIONS,
   DELIVERY_TIME_SLOTS,
   EXTRA_OCCASIONS_BY_PRODUCT_ID,
+  FALLBACK_API_PRODUCTS,
+  FALLBACK_BANNERS,
+  FALLBACK_CATEGORIES,
+  FALLBACK_EXPERIENCES,
+  FALLBACK_POSTS,
   FEATURED_HANGING_PRODUCT_IDS,
   FLOWER_STEMS,
   GREETING_SUGGESTIONS,
@@ -32,13 +37,19 @@ import {
 } from '../data/atelier-catalog';
 import {
   AddonOption,
+  ApiBanner,
+  ApiCategory,
   ApiCreateOrderPayload,
+  ApiExperienceVideo,
+  ApiHomePayload,
+  ApiPost,
   ApiProduct,
   ApiSavedOrder,
   BOUQUET_SIZE_DELTAS,
   BOUQUET_SIZE_OPTIONS,
   BouquetItem,
   BouquetSize,
+  CartItem,
   CatalogSyncStatus,
   ConfirmedOrder,
   DeliveryDayOption,
@@ -46,6 +57,7 @@ import {
   OccasionTheme,
   OrderSource,
   SelectedStemEntry,
+  ToastState,
   VoucherCode,
   VoucherFeedback,
   WrapPaperId,
@@ -54,6 +66,7 @@ import {
 
 const STORAGE_KEY_STEMS = 'fleure-boutique:custom-stems:v1';
 const STORAGE_KEY_WRAP = 'fleure-boutique:custom-wrap:v1';
+const STORAGE_KEY_CART = 'fleure-boutique:cart:v1';
 const MAX_STEMS_PER_VARIETY = 30;
 const MIN_CUSTOM_BOUQUET_STEMS = 3;
 const FREE_SHIPPING_THRESHOLD = 399000;
@@ -62,6 +75,8 @@ const FLEURE20_MIN_SUBTOTAL = 450000;
 const API_TIMEOUT_MS = 35000;
 const SLOW_SERVER_HINT_DELAY_MS = 2500;
 const DEFAULT_CUSTOM_BASE_PRODUCT_ID = 12;
+const TOAST_DURATION_MS = 4200;
+const TOAST_UNDO_DURATION_MS = 5500;
 
 const VALID_OCCASION_IDS: ReadonlySet<string> = new Set<OccasionId>([
   'hoa-sinh-nhat',
@@ -88,17 +103,64 @@ export class AtelierService {
   private readonly isBrowser = isPlatformBrowser(this.platformId);
 
   private catalogSub: Subscription | null = null;
+  private homeSub: Subscription | null = null;
+  private postsSub: Subscription | null = null;
+  private experiencesSub: Subscription | null = null;
+  private searchSub: Subscription | null = null;
   private submitOrderSub: Subscription | null = null;
   private recentOrdersSub: Subscription | null = null;
   private slowNoticeTimer: ReturnType<typeof setTimeout> | null = null;
+  private toastTimer: ReturnType<typeof setTimeout> | null = null;
+  private lastRemovedCart: { item: CartItem; index: number } | null = null;
 
   // =========================================================================
-  // 1. DANH MỤC SẢN PHẨM ĐỒNG BỘ TỪ MONGODB + TÀI NGUYÊN CỬA HÀNG
+  // 1. DANH MỤC 6 COLLECTION ĐỒNG BỘ TỪ MONGODB + TÀI NGUYÊN CỬA HÀNG
   // =========================================================================
+  readonly apiProducts = signal<readonly ApiProduct[]>(FALLBACK_API_PRODUCTS);
   readonly bouquets = signal<readonly BouquetItem[]>(SIGNATURE_BOUQUETS);
   readonly catalogStatus = signal<CatalogSyncStatus>('loading');
   readonly catalogError = signal<string | null>(null);
   readonly catalogCount = computed<number>(() => this.bouquets().length);
+
+  readonly categories = signal<readonly ApiCategory[]>(FALLBACK_CATEGORIES);
+  readonly banners = signal<readonly ApiBanner[]>(FALLBACK_BANNERS);
+  readonly homeLoaded = signal<boolean>(false);
+  readonly homeLoading = signal<boolean>(false);
+  readonly homeNewProducts = signal<readonly ApiProduct[]>(FALLBACK_API_PRODUCTS.slice(0, 4));
+  readonly homeBestSellingProducts = signal<readonly ApiProduct[]>(
+    [...FALLBACK_API_PRODUCTS].sort((a, b) => b.sold - a.sold).slice(0, 4)
+  );
+  readonly homeSaleProducts = signal<readonly ApiProduct[]>(
+    FALLBACK_API_PRODUCTS.filter((p) => p.discount > 0).slice(0, 4)
+  );
+  readonly homeLatestPosts = signal<readonly ApiPost[]>(FALLBACK_POSTS.slice(0, 3));
+
+  readonly posts = signal<readonly ApiPost[]>(FALLBACK_POSTS);
+  readonly postsLoaded = signal<boolean>(false);
+  readonly postsLoading = signal<boolean>(false);
+  readonly postsError = signal<string | null>(null);
+
+  readonly experiences = signal<readonly ApiExperienceVideo[]>(FALLBACK_EXPERIENCES);
+  readonly experiencesLoaded = signal<boolean>(false);
+  readonly experiencesLoading = signal<boolean>(false);
+  readonly experiencesError = signal<string | null>(null);
+
+  // --- Tìm kiếm sản phẩm trực tiếp qua REST API (`GET /api/products?search=...`) ---
+  readonly searchQuery = signal<string>('');
+  readonly searchResults = signal<ApiProduct[] | null>(null);
+  readonly searching = signal<boolean>(false);
+
+  // --- Giỏ hoa đa sản phẩm (`/cart`) lưu bền vững trong localStorage ---
+  readonly cartItems = signal<CartItem[]>(this.loadInitialCart());
+  readonly cartCount = computed<number>(() =>
+    this.cartItems().reduce((sum, entry) => sum + entry.quantity, 0)
+  );
+  readonly cartSubtotal = computed<number>(() =>
+    this.cartItems().reduce((sum, entry) => sum + entry.product.priceValue * entry.quantity, 0)
+  );
+
+  // --- Thông báo Toast toàn cục hỗ trợ nút Hoàn tác khi xóa sản phẩm khỏi giỏ ---
+  readonly toastState = signal<ToastState | null>(null);
 
   readonly occasions = OCCASION_THEMES;
   readonly stems = FLOWER_STEMS;
@@ -299,9 +361,14 @@ export class AtelierService {
     // Dọn dẹp toàn bộ subscription và bộ đếm thời gian khi service bị hủy
     this.destroyRef.onDestroy(() => {
       this.catalogSub?.unsubscribe();
+      this.homeSub?.unsubscribe();
+      this.postsSub?.unsubscribe();
+      this.experiencesSub?.unsubscribe();
+      this.searchSub?.unsubscribe();
       this.submitOrderSub?.unsubscribe();
       this.recentOrdersSub?.unsubscribe();
       this.clearSlowNoticeTimer();
+      this.clearToastTimer();
     });
 
     // Tự động đồng bộ cấu hình bó hoa tự phối vào localStorage trên trình duyệt
@@ -312,6 +379,17 @@ export class AtelierService {
       try {
         window.localStorage.setItem(STORAGE_KEY_STEMS, JSON.stringify(counts));
         window.localStorage.setItem(STORAGE_KEY_WRAP, wrapId);
+      } catch {
+        // Bỏ qua an toàn nếu trình duyệt chặn quyền ghi localStorage
+      }
+    });
+
+    // Tự động lưu giỏ hàng đa sản phẩm vào localStorage để không mất khi tải lại trang
+    effect(() => {
+      const items = this.cartItems();
+      if (!this.isBrowser) return;
+      try {
+        window.localStorage.setItem(STORAGE_KEY_CART, JSON.stringify(items));
       } catch {
         // Bỏ qua an toàn nếu trình duyệt chặn quyền ghi localStorage
       }
@@ -343,7 +421,10 @@ export class AtelierService {
             return;
           }
 
-          const mapped = this.mapApiProductsToBouquets(products);
+          const normalizedProducts = products.map((item) => this.normalizeApiProduct(item));
+          this.apiProducts.set(normalizedProducts);
+
+          const mapped = this.mapApiProductsToBouquets(normalizedProducts);
           this.bouquets.set(mapped);
           this.catalogStatus.set('live');
           this.catalogError.set(null);
@@ -364,6 +445,355 @@ export class AtelierService {
           );
         },
       });
+  }
+
+  /**
+   * Nạp dữ liệu tổng hợp trang chủ (`GET /api/home`) gồm banners, categories, hoa mới, bán chạy, giảm giá và bài viết mới.
+   */
+  ensureHomeLoaded(force = false): void {
+    if (!force && (this.homeLoaded() || this.homeLoading())) {
+      return;
+    }
+    this.homeSub?.unsubscribe();
+    this.homeLoading.set(true);
+
+    this.homeSub = this.http
+      .get<ApiHomePayload>(`${this.apiBase}/home`)
+      .pipe(timeout(API_TIMEOUT_MS))
+      .subscribe({
+        next: (payload) => {
+          if (Array.isArray(payload?.categories) && payload.categories.length > 0) {
+            this.categories.set(payload.categories);
+          }
+          if (Array.isArray(payload?.banners) && payload.banners.length > 0) {
+            this.banners.set(
+              payload.banners.map((b) => ({ ...b, image: this.normalizeAssetUrl(b.image) }))
+            );
+          }
+          if (Array.isArray(payload?.newProducts) && payload.newProducts.length > 0) {
+            this.homeNewProducts.set(
+              payload.newProducts.map((p) => this.normalizeApiProduct(p))
+            );
+          }
+          if (
+            Array.isArray(payload?.bestSellingProducts) &&
+            payload.bestSellingProducts.length > 0
+          ) {
+            this.homeBestSellingProducts.set(
+              payload.bestSellingProducts.map((p) => this.normalizeApiProduct(p))
+            );
+          }
+          if (Array.isArray(payload?.saleProducts) && payload.saleProducts.length > 0) {
+            this.homeSaleProducts.set(
+              payload.saleProducts.map((p) => this.normalizeApiProduct(p))
+            );
+          }
+          if (Array.isArray(payload?.latestPosts) && payload.latestPosts.length > 0) {
+            this.homeLatestPosts.set(payload.latestPosts.map((p) => this.normalizeApiPost(p)));
+          }
+          this.homeLoaded.set(true);
+          this.homeLoading.set(false);
+        },
+        error: () => {
+          this.homeLoading.set(false);
+        },
+      });
+  }
+
+  /** Nạp danh sách 6 bài viết cẩm nang hoa từ collection `posts` (`GET /api/posts`) */
+  ensurePostsLoaded(force = false): void {
+    if (!force && (this.postsLoaded() || this.postsLoading())) {
+      return;
+    }
+    this.postsSub?.unsubscribe();
+    this.postsLoading.set(true);
+    this.postsError.set(null);
+
+    this.postsSub = this.http
+      .get<ApiPost[]>(`${this.apiBase}/posts`)
+      .pipe(timeout(API_TIMEOUT_MS))
+      .subscribe({
+        next: (list) => {
+          if (Array.isArray(list) && list.length > 0) {
+            this.posts.set(list.map((p) => this.normalizeApiPost(p)));
+          }
+          this.postsLoaded.set(true);
+          this.postsLoading.set(false);
+        },
+        error: () => {
+          this.postsLoading.set(false);
+          this.postsError.set(
+            'Không thể tải bài viết mới từ MongoDB lúc này. Đang hiển thị bài viết lưu sẵn.'
+          );
+        },
+      });
+  }
+
+  /** Nạp danh sách 4 video trải nghiệm bó hoa từ collection `experiences` (`GET /api/experiences`) */
+  ensureExperiencesLoaded(force = false): void {
+    if (!force && (this.experiencesLoaded() || this.experiencesLoading())) {
+      return;
+    }
+    this.experiencesSub?.unsubscribe();
+    this.experiencesLoading.set(true);
+    this.experiencesError.set(null);
+
+    this.experiencesSub = this.http
+      .get<ApiExperienceVideo[]>(`${this.apiBase}/experiences`)
+      .pipe(timeout(API_TIMEOUT_MS))
+      .subscribe({
+        next: (list) => {
+          if (Array.isArray(list) && list.length > 0) {
+            this.experiences.set(list.map((v) => this.normalizeApiExperience(v)));
+          }
+          this.experiencesLoaded.set(true);
+          this.experiencesLoading.set(false);
+        },
+        error: () => {
+          this.experiencesLoading.set(false);
+          this.experiencesError.set(
+            'Không thể đồng bộ video Atelier từ MongoDB lúc này. Đang hiển thị video lưu sẵn.'
+          );
+        },
+      });
+  }
+
+  /** Gọi `GET /api/products` theo `categorySlug` hoặc từ khóa `search` (phục vụ `/category/:slug` và `/products`) */
+  fetchProductsByFilter(params: {
+    categorySlug?: string;
+    search?: string;
+  }): Observable<ApiProduct[]> {
+    let httpParams = new HttpParams();
+    if (params.categorySlug && params.categorySlug !== 'tat-ca') {
+      httpParams = httpParams.set('categorySlug', params.categorySlug);
+    }
+    if (params.search?.trim()) {
+      httpParams = httpParams.set('search', params.search.trim());
+    }
+    return this.http
+      .get<ApiProduct[]>(`${this.apiBase}/products`, { params: httpParams })
+      .pipe(
+        timeout(API_TIMEOUT_MS),
+        map((items) => (Array.isArray(items) ? items.map((p) => this.normalizeApiProduct(p)) : []))
+      );
+  }
+
+  /** Gọi `GET /api/products/:slugOrId` để lấy chi tiết 1 mẫu hoa cho trang `/product/:slug` */
+  fetchProductBySlugOrId(slugOrId: string): Observable<ApiProduct> {
+    return this.http
+      .get<ApiProduct>(`${this.apiBase}/products/${encodeURIComponent(slugOrId.trim())}`)
+      .pipe(
+        timeout(API_TIMEOUT_MS),
+        map((product) => this.normalizeApiProduct(product))
+      );
+  }
+
+  /** Tìm kiếm sản phẩm trực tiếp qua REST API (`GET /api/products?search=...`) */
+  searchProductsFromApi(query: string): void {
+    const clean = query.trim();
+    this.searchSub?.unsubscribe();
+
+    if (!clean) {
+      this.searchResults.set(null);
+      this.searching.set(false);
+      return;
+    }
+
+    this.searching.set(true);
+    this.searchSub = this.fetchProductsByFilter({ search: clean }).subscribe({
+      next: (items) => {
+        this.searchResults.set(items);
+        this.searching.set(false);
+      },
+      error: () => {
+        this.searchResults.set(null);
+        this.searching.set(false);
+      },
+    });
+  }
+
+  /** Tra cứu nhanh `ApiProduct` trong bộ nhớ theo `slug` SEO hoặc `id` số */
+  getApiProductBySlugOrId(slugOrId: string): ApiProduct | undefined {
+    const key = slugOrId.trim().toLowerCase();
+    return this.apiProducts().find(
+      (p) => p.slug.toLowerCase() === key || String(p.id) === key
+    );
+  }
+
+  /** Tra cứu nhanh `ApiProduct` theo `id` số (phục vụ sản phẩm liên quan ở Bài viết & Trải nghiệm) */
+  getApiProductById(id: number): ApiProduct | undefined {
+    return this.apiProducts().find((p) => p.id === id);
+  }
+
+  /** Trả về slug SEO chuẩn cho một `BouquetItem` để dẫn sang `/product/:slug` */
+  getDetailSlugForBouquet(bouquet: BouquetItem): string {
+    const matched = this.getApiProductById(bouquet.apiProductId);
+    return matched?.slug || bouquet.id;
+  }
+
+  /** Chuyển đổi `ApiProduct` sang `BouquetItem` và mở nhanh Ngăn kéo đặt hoa + Thiệp gấp 3D */
+  openOrderForApiProduct(product: ApiProduct): void {
+    const matched = this.bouquets().find((b) => b.apiProductId === product.id);
+    if (matched) {
+      this.openOrderForBouquet(matched);
+      return;
+    }
+    const [mapped] = this.mapApiProductsToBouquets([product]);
+    if (mapped) {
+      this.openOrderForBouquet(mapped);
+    }
+  }
+
+  // =========================================================================
+  // QUẢN LÝ GIỎ HÀNG ĐA MÓN (`/cart`) + HOÀN TÁC (UNDO TOAST) + POST /api/orders
+  // =========================================================================
+
+  /** Thêm sản phẩm vào giỏ hoa (gộp số lượng nếu đã có trong giỏ) */
+  addToCart(product: ApiProduct, quantity = 1): void {
+    const safeQty = Math.max(1, Math.floor(quantity));
+    const normalized = this.normalizeApiProduct(product);
+
+    this.cartItems.update((items) => {
+      const idx = items.findIndex((entry) => entry.product.id === normalized.id);
+      if (idx >= 0) {
+        return items.map((entry, i) =>
+          i === idx ? { ...entry, quantity: entry.quantity + safeQty } : entry
+        );
+      }
+      return [{ product: normalized, quantity: safeQty }, ...items];
+    });
+
+    this.showToast(`Đã thêm "${normalized.name}" vào giỏ hoa.`);
+  }
+
+  /** Cầu nối thêm một `BouquetItem` từ trang chủ vào giỏ hoa đa món */
+  addBouquetToCart(bouquet: BouquetItem, quantity = 1): void {
+    const matched = this.getApiProductById(bouquet.apiProductId);
+    if (matched) {
+      this.addToCart(matched, quantity);
+      return;
+    }
+    const synthesized: ApiProduct = {
+      id: bouquet.apiProductId || DEFAULT_CUSTOM_BASE_PRODUCT_ID,
+      name: bouquet.name,
+      slug: bouquet.id,
+      categoryId: 1,
+      category: 'Hoa tươi FLEURÉ',
+      categorySlug: bouquet.categorySlug ?? 'hoa-sinh-nhat',
+      price: this.formatVnd(bouquet.basePrice),
+      oldPrice: bouquet.oldPriceValue ? this.formatVnd(bouquet.oldPriceValue) : '',
+      priceValue: bouquet.basePrice,
+      oldPriceValue: bouquet.oldPriceValue ?? bouquet.basePrice,
+      image: this.normalizeAssetUrl(bouquet.image),
+      description: bouquet.story,
+      meaning: bouquet.poeticNote,
+      discount: bouquet.discount ?? 0,
+      sold: bouquet.sold ?? 0,
+      badge: bouquet.tag,
+    };
+    this.addToCart(synthesized, quantity);
+  }
+
+  /** Tăng/giảm số lượng sản phẩm trong giỏ; nếu giảm về 0 sẽ xóa kèm thông báo Hoàn tác */
+  updateCartQuantity(productId: number, delta: number): void {
+    const existing = this.cartItems().find((entry) => entry.product.id === productId);
+    if (!existing) return;
+
+    const nextQty = existing.quantity + delta;
+    if (nextQty <= 0) {
+      this.removeCartItem(productId);
+      return;
+    }
+
+    this.cartItems.update((items) =>
+      items.map((entry) =>
+        entry.product.id === productId ? { ...entry, quantity: nextQty } : entry
+      )
+    );
+  }
+
+  /** Xóa sản phẩm khỏi giỏ hàng và lưu tạm để người dùng có thể bấm "Hoàn tác" trong 5.5 giây */
+  removeCartItem(productId: number): void {
+    const items = this.cartItems();
+    const index = items.findIndex((entry) => entry.product.id === productId);
+    if (index < 0) return;
+
+    const removed = items[index];
+    this.lastRemovedCart = { item: removed, index };
+    this.cartItems.set(items.filter((_, i) => i !== index));
+    this.showToast(`Đã xóa "${removed.product.name}" khỏi giỏ hoa.`, true);
+  }
+
+  /** Khôi phục lại sản phẩm vừa xóa khỏi giỏ hàng vào đúng vị trí cũ */
+  undoRemoveCartItem(): void {
+    const snapshot = this.lastRemovedCart;
+    if (!snapshot) return;
+
+    this.lastRemovedCart = null;
+    this.cartItems.update((items) => {
+      if (items.some((entry) => entry.product.id === snapshot.item.product.id)) {
+        return items;
+      }
+      const next = [...items];
+      const insertAt = Math.min(snapshot.index, next.length);
+      next.splice(insertAt, 0, snapshot.item);
+      return next;
+    });
+    this.showToast(`Đã khôi phục "${snapshot.item.product.name}" vào giỏ hoa.`);
+  }
+
+  /** Làm trống toàn bộ giỏ hàng */
+  clearCart(): void {
+    this.lastRemovedCart = null;
+    this.cartItems.set([]);
+  }
+
+  /** Gửi đơn giỏ hàng đa sản phẩm lên `POST /api/orders` (MongoDB), tự động xóa giỏ & cập nhật lịch sử */
+  placeCartOrder(payload: ApiCreateOrderPayload): Observable<ApiSavedOrder> {
+    return this.http.post<ApiSavedOrder>(`${this.apiBase}/orders`, payload).pipe(
+      timeout(API_TIMEOUT_MS),
+      tap((saved) => {
+        this.clearCart();
+        this.recentOrders.update((prev) =>
+          [saved, ...prev.filter((item) => item.orderCode !== saved.orderCode)].slice(0, 5)
+        );
+        this.showToast(`Đặt hoa thành công! Mã đơn #${saved.orderCode}.`);
+      })
+    );
+  }
+
+  /** Hiển thị thông báo Toast toàn cục (có hoặc không kèm nút Hoàn tác) */
+  showToast(message: string, canUndo = false): void {
+    this.clearToastTimer();
+    this.toastState.set({ message, canUndo });
+
+    if (this.isBrowser) {
+      this.toastTimer = setTimeout(
+        () => {
+          this.toastState.set(null);
+          if (canUndo) {
+            this.lastRemovedCart = null;
+          }
+        },
+        canUndo ? TOAST_UNDO_DURATION_MS : TOAST_DURATION_MS
+      );
+    }
+  }
+
+  /** Đóng ngay thông báo Toast đang hiển thị */
+  dismissToast(): void {
+    this.clearToastTimer();
+    this.toastState.set(null);
+  }
+
+  /** Chuẩn hóa đường dẫn media để luôn hoạt động chuẩn ở mọi route lồng nhau (`/category/:slug`, `/product/:slug`) */
+  normalizeAssetUrl(raw: string | undefined | null): string {
+    const clean = (raw ?? '').trim();
+    if (!clean) return '/images/bouquet-juliet-peony.png';
+    if (/^(https?:|data:|blob:|\/)/i.test(clean)) {
+      return clean;
+    }
+    return `/${clean.replace(/^\.?\//, '')}`;
   }
 
   /** Gọi `GET /api/orders` để tải 5 đơn đặt hoa mới nhất đã lưu trong MongoDB */
@@ -1063,6 +1493,68 @@ export class AtelierService {
     if (this.slowNoticeTimer !== null) {
       clearTimeout(this.slowNoticeTimer);
       this.slowNoticeTimer = null;
+    }
+  }
+
+  private clearToastTimer(): void {
+    if (this.toastTimer !== null) {
+      clearTimeout(this.toastTimer);
+      this.toastTimer = null;
+    }
+  }
+
+  private normalizeApiProduct(product: ApiProduct): ApiProduct {
+    return {
+      ...product,
+      image: this.normalizeAssetUrl(product.image),
+    };
+  }
+
+  private normalizeApiPost(post: ApiPost): ApiPost {
+    return {
+      ...post,
+      image: this.normalizeAssetUrl(post.image),
+    };
+  }
+
+  private normalizeApiExperience(video: ApiExperienceVideo): ApiExperienceVideo {
+    return {
+      ...video,
+      posterImage: this.normalizeAssetUrl(video.posterImage),
+      videoUrl: this.normalizeAssetUrl(video.videoUrl),
+    };
+  }
+
+  private loadInitialCart(): CartItem[] {
+    if (!this.isBrowser) {
+      return [];
+    }
+
+    try {
+      const raw = window.localStorage.getItem(STORAGE_KEY_CART);
+      if (!raw) return [];
+      const parsed = JSON.parse(raw) as unknown;
+      if (!Array.isArray(parsed)) return [];
+
+      const sanitized: CartItem[] = [];
+      for (const entry of parsed) {
+        if (
+          typeof entry === 'object' &&
+          entry !== null &&
+          typeof (entry as CartItem).quantity === 'number' &&
+          (entry as CartItem).quantity > 0 &&
+          typeof (entry as CartItem).product?.id === 'number' &&
+          typeof (entry as CartItem).product?.name === 'string'
+        ) {
+          sanitized.push({
+            product: this.normalizeApiProduct((entry as CartItem).product),
+            quantity: Math.max(1, Math.floor((entry as CartItem).quantity)),
+          });
+        }
+      }
+      return sanitized;
+    } catch {
+      return [];
     }
   }
 

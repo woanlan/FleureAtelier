@@ -1,36 +1,76 @@
-<!-- Thanh điều hướng cố định đầu trang FLEURÉ — Flower Boutique -->
+<!-- Thanh điều hướng đa trang cố định đầu trang FLEURÉ — Flower Boutique -->
 <header class="header-shell">
   <div class="atelier-container header-bar">
-    <!-- Thương hiệu góc trái: về đầu trang -->
+    <!-- Thương hiệu góc trái: về Trang chủ -->
     <a
-      href="#top"
+      routerLink="/"
       class="brand-link"
-      (click)="navigateToSection($event, 'top')"
-      aria-label="FLEURÉ Flower Boutique, về đầu trang"
+      (click)="closeAllPanels()"
+      aria-label="FLEURÉ Flower Boutique, về trang chủ"
     >
       <span class="brand-name">FLEURÉ</span>
       <span class="brand-subtitle">Flower Boutique</span>
     </a>
 
-    <!-- Điều hướng trung tâm trên màn hình rộng (> 860px) -->
+    <!-- Điều hướng đa trang trên màn hình rộng (>= 1024px) -->
     <nav class="desktop-nav" aria-label="Điều hướng chính">
       <ul class="desktop-nav-list">
-        @for (item of navItems; track item.sectionId) {
+        @for (item of navItems; track item.label) {
           <li class="desktop-nav-item">
-            <a
-              [href]="item.href"
-              class="desktop-nav-link"
-              (click)="navigateToSection($event, item.sectionId)"
-            >
-              {{ item.label }}
-            </a>
+            @if (item.fragment) {
+              <a
+                [routerLink]="[item.route]"
+                [fragment]="item.fragment"
+                class="desktop-nav-link"
+                (click)="onNavItemClick($event, item)"
+              >
+                {{ item.label }}
+              </a>
+            } @else {
+              <a
+                [routerLink]="[item.route]"
+                routerLinkActive="is-active"
+                [routerLinkActiveOptions]="{ exact: !!item.exact }"
+                class="desktop-nav-link"
+                (click)="closeAllPanels()"
+              >
+                {{ item.label }}
+              </a>
+            }
           </li>
         }
       </ul>
     </nav>
 
-    <!-- Cụm hành động bên phải: Nút Đặt hoa & Nút mở menu trên màn hình hẹp -->
+    <!-- Cụm hành động bên phải: Tìm kiếm, Giỏ hoa, Đặt nhanh (Thiệp 3D) & Menu di động -->
     <div class="header-actions">
+      <button
+        type="button"
+        class="header-icon-btn"
+        [class.is-active]="searchBarOpen()"
+        [attr.aria-expanded]="searchBarOpen()"
+        aria-controls="header-search-panel"
+        aria-label="Tìm kiếm mẫu hoa"
+        (click)="toggleSearchBar()"
+      >
+        <app-icon [name]="searchBarOpen() ? 'x' : 'search'" [size]="18" />
+      </button>
+
+      <a
+        routerLink="/cart"
+        routerLinkActive="is-active"
+        class="header-cart-btn"
+        [attr.aria-label]="cartAriaLabel()"
+        (click)="closeAllPanels()"
+      >
+        <app-icon name="shopping-bag" [size]="18" />
+        @if (atelier.cartCount() > 0) {
+          <span class="cart-count-badge tabular-nums" aria-hidden="true">
+            {{ atelier.cartCount() }}
+          </span>
+        }
+      </a>
+
       <button
         type="button"
         class="order-cta-btn"
@@ -59,7 +99,39 @@
     </div>
   </div>
 
-  <!-- Ngăn trượt điều hướng cho màn hình <= 860px (trượt mượt bằng grid-template-rows) -->
+  <!-- Thanh tìm kiếm mở rộng trượt gọn ngay dưới header (dùng chung cho Desktop & Mobile) -->
+  @if (searchBarOpen()) {
+    <div id="header-search-panel" class="search-panel">
+      <form class="atelier-container search-form" (submit)="onSearchSubmit($event)" role="search">
+        <label for="fleure-header-search" class="sr-only">Tìm kiếm mẫu hoa tại FLEURÉ</label>
+        <div class="search-input-wrap">
+          <app-icon name="search" [size]="18" />
+          <input
+            #desktopSearchInput
+            id="fleure-header-search"
+            type="search"
+            class="search-input"
+            placeholder="Tìm hồng pastel, tulip..."
+            [value]="atelier.searchQuery()"
+            (input)="onSearchInput($event)"
+          />
+          @if (atelier.searchQuery()) {
+            <button
+              type="button"
+              class="search-clear-btn"
+              aria-label="Xóa từ khóa tìm kiếm"
+              (click)="clearSearch()"
+            >
+              <app-icon name="x" [size]="15" />
+            </button>
+          }
+        </div>
+        <button type="submit" class="search-submit-btn">Tìm hoa</button>
+      </form>
+    </div>
+  }
+
+  <!-- Ngăn trượt điều hướng cho màn hình <= 1023px -->
   <div
     id="mobile-nav-drawer"
     class="mobile-drawer"
@@ -69,25 +141,56 @@
     <div class="mobile-drawer-inner">
       <nav class="atelier-container mobile-nav" aria-label="Điều hướng di động">
         <ul class="mobile-nav-list">
-          @for (item of navItems; track item.sectionId) {
+          @for (item of navItems; track item.label) {
             <li class="mobile-nav-item">
-              <a
-                [href]="item.href"
-                class="mobile-nav-link"
-                (click)="navigateToSection($event, item.sectionId)"
-              >
-                <span>{{ item.label }}</span>
-                <app-icon name="chevron-right" [size]="16" />
-              </a>
+              @if (item.fragment) {
+                <a
+                  [routerLink]="[item.route]"
+                  [fragment]="item.fragment"
+                  class="mobile-nav-link"
+                  (click)="onNavItemClick($event, item)"
+                >
+                  <span>{{ item.label }}</span>
+                  <app-icon name="chevron-right" [size]="16" />
+                </a>
+              } @else {
+                <a
+                  [routerLink]="[item.route]"
+                  routerLinkActive="is-active"
+                  [routerLinkActiveOptions]="{ exact: !!item.exact }"
+                  class="mobile-nav-link"
+                  (click)="closeAllPanels()"
+                >
+                  <span>{{ item.label }}</span>
+                  <app-icon name="chevron-right" [size]="16" />
+                </a>
+              }
             </li>
           }
+
+          <li class="mobile-nav-item">
+            <a
+              routerLink="/cart"
+              routerLinkActive="is-active"
+              class="mobile-nav-link"
+              (click)="closeAllPanels()"
+            >
+              <span>
+                Giỏ hoa của bạn
+                @if (atelier.cartCount() > 0) {
+                  <strong class="tabular-nums">({{ atelier.cartCount() }})</strong>
+                }
+              </span>
+              <app-icon name="chevron-right" [size]="16" />
+            </a>
+          </li>
         </ul>
       </nav>
     </div>
   </div>
 </header>
 
-<!-- Lớp màn mờ đóng menu khi chạm ra ngoài trên thiết bị di động (luật I21) -->
-@if (mobileMenuOpen()) {
-  <div class="mobile-backdrop" aria-hidden="true" (click)="closeMobileMenu()"></div>
+<!-- Lớp màn mờ đóng menu / thanh tìm kiếm khi chạm ra ngoài -->
+@if (mobileMenuOpen() || searchBarOpen()) {
+  <div class="mobile-backdrop" aria-hidden="true" (click)="closeAllPanels()"></div>
 }

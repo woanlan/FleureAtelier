@@ -1,43 +1,47 @@
-# FLEURÉ — Flower Boutique
+# FLEURÉ — Flower Boutique (Mobile-First 430px Full-Stack Angular 22)
 
 > **Gói chút hoa, gửi chút thương.**  
 > 45 Nguyễn Huệ, Quận 1, TP. Hồ Chí Minh · Hotline/Zalo: `0909 123 456` · Mở cửa `07:30 – 21:00` mỗi ngày · Giao hỏa tốc 60 phút nội thành TP.HCM.
 
-Website cửa hàng hoa nghệ thuật & bàn tự phối hoa theo ý riêng mang bản sắc **Hồng Pastel (`#FFF5F7`) & Đỏ Ruby (`#9D2547` / `#240B13`)**, xây dựng bằng **Angular 22 Standalone + Signals**, kết nối trực tiếp tới Backend Express + MongoDB Atlas (`https://fleureshop.onrender.com/api`).
+Website cửa hàng hoa nghệ thuật & bàn tự phối hoa theo ý riêng mang bản sắc **Hồng Pastel (`#FFF5F7`) & Đỏ Ruby (`#9D2547` / `#240B13`)**, khóa chuẩn **khung giao diện di động Mobile-First `430px` căn giữa (kể cả khi duyệt trên Desktop)** theo đúng yêu cầu **Lab 1–4 & Assignment Giai đoạn 1 (WEB2081)**, xây dựng bằng **Angular 22 Standalone + Signals + Lazy Loading**, kết nối trực tiếp toàn bộ **6 collection MongoDB Atlas** qua Backend Express MVC trên Render (`https://fleureshop.onrender.com/api`).
 
-## Tính năng nổi bật
+## Link Triển Khai Thực Tế (Live Production)
+- **Website Frontend (Vercel):** https://fleure-atelier-854a.vercel.app/
+- **Backend REST API (Render + MongoDB Atlas):** https://fleureshop.onrender.com/api/health
+- **GitHub Repository:** https://github.com/woanlan/FleureAtelier
 
-1. **Hero Rượu vang Ruby & Cánh hoa rơi (`<app-hero-atelier>`)**: Tương phản tinh tế giữa nền Ruby đậm (`#240B13`), điểm nhấn Hồng Phấn Champagne (`#F2B8C6`) và cặp phông chữ tiếng Việt `Playfair Display` + `Be Vietnam Pro`.
-2. **Kệ Bộ sưu tập hoa treo chiều sâu 3D (`#bo-suu-tap`)**: Đồng bộ trực tiếp 12 bó hoa thật từ MongoDB (`GET /api/products`) kèm trạng thái đồng bộ thời gian thực, giá gốc gạch ngang khi khuyến mãi và bộ dự phòng tức thì khi mất mạng.
-3. **Chọn hoa Theo 6 Dịp tặng (`#theo-dip`)**: Chuyển mượt giữa *Hoa sinh nhật, Hoa tình yêu, Hoa chúc mừng, Hoa cưới, Lan hồ điệp, Gửi lời cảm ơn* với nền pastel riêng, hiệu ứng cánh hoa `<canvas>` đồng điệu và 4 bó hoa tuyển chọn từ MongoDB cho mỗi dịp.
-4. **Bàn Tự bó hoa FLEURÉ (`#tu-bo-hoa`)**: Tự chọn 10 dòng cành hoa Đà Lạt & nhập khẩu (`30.000đ – 95.000đ/cành`), phối 3 kiểu giấy lụa Pháp (*Lụa Hồng Phấn, Voan Kem Pháp, Giấy Đỏ Ruby*), cập nhật hình bó hoa minh họa cùng thành tiền tức thì và tự lưu nháp vào `localStorage`.
-5. **Lịch mùa hoa Đà Lạt (`#lich-hoa`)**: Giới thiệu 6 mùa hoa đặc trưng cao nguyên Đà Lạt (*Tulip Hồng Nắng Mai, Hồng Ohara Kem Dâu Đà Lạt, Mẫu Đơn Phấn Cao Nguyên, Cẩm Tú Cầu Trại Mát, Lan Hồ Điệp Bảo Lộc, Cúc Họa Mi Sương Sớm Đà Lạt*) kèm liên kết đặt nhanh bó hoa đồng bộ từ MongoDB.
-6. **Ngăn kéo Đặt hoa, Lưu MongoDB, Mã ưu đãi & Thiệp gấp 3D (`<app-order-drawer>`)**: Nhập họ tên, SĐT, địa chỉ giao hoa, áp mã ưu đãi (`FLEURE20`, `YEUHOA15`, `FREESHIP60`), xem trước thiệp gấp 3D, lưu đơn trực tiếp vào MongoDB (`POST /api/orders`) sinh mã thật `#FL-xxxxxx`, đối soát đơn gần nhất (`GET /api/orders`) và sao chép gửi Zalo `0909 123 456`.
+## Hệ thống Định tuyến Đa trang chuẩn SEO (Lazy Loading `loadComponent`)
 
-## Cách chạy dự án trên máy
+| Đường dẫn URL | Thành phần Lazy-Loaded | Tính năng & API MongoDB sử dụng |
+| :--- | :--- | :--- |
+| `/` | `HomePage` | Trọn vẹn 5 phân khu biên tập FLEURÉ (*Hero Ruby, Kệ hoa treo 3D, Chọn hoa theo 6 Dịp, Bàn tự phối hoa cành thật + gói lụa Pháp, Lịch mùa hoa Đà Lạt Mosaic 6×8*) + Cầu nối danh mục & `GET /api/home` (`banners`, `categories`, `products`, `posts`) |
+| `/products` & `/category/:slug` | `ProductsPage` | Danh sách 12 mẫu hoa 2 cột dùng `<app-product-card>` (`input()`, `output()`, `DecimalPipe`), tìm kiếm API (`GET /api/products?search=...`), lọc theo SEO slug (`GET /api/products?categorySlug=...`), 5 kiểu sắp xếp, đếm kết quả, phân trang & `@empty` |
+| `/product/:slug` | `ProductDetailPage` | Chi tiết sản phẩm theo SEO slug (`GET /api/products/:slugOrId`), tự động đặt lại số lượng về `1` bằng **`linkedSignal()`** khi chuyển sản phẩm liên quan, Breadcrumb, Thêm vào giỏ / Mua ngay / Đặt nhanh Thiệp 3D |
+| `/promotions` | `PromotionsPage` | Flash Sale nền Ruby kèm đồng hồ đếm ngược live, 3 mã ưu đãi (`FLEURE20`, `YEUHOA15`, `FREESHIP60`) sao chép 1 chạm + tự áp vào Giỏ hoa, lọc sản phẩm giảm giá |
+| `/bai_viet` (`/posts` → `/bai_viet`) | `PostsPage` | Góc Cẩm Nang đọc 6 bài viết từ `GET /api/posts`, lọc 5 chuyên mục, hỗ trợ deep-link `?id=...`, khung đọc chi tiết kèm `careTip` & bó hoa liên quan |
+| `/experience` | `ExperiencePage` | Thư viện 4 video hướng dẫn từ `GET /api/experiences`, trình phát HTML5 `<video>`, 3 bước kỹ thuật nghệ nhân, danh sách phát & mẫu hoa liên kết |
+| `/cart` | `CartPage` | Giỏ hàng đa sản phẩm lưu bền `localStorage` (`fleure-boutique:cart:v1`), tăng/giảm, xóa kèm **Toast Hoàn tác (`Undo`)**, kiểm tra voucher & Freeship `399.000đ`, đặt đơn lưu thật lên MongoDB (`POST /api/orders`) và đối soát đơn gần nhất (`GET /api/orders`) |
+
+## Cách chạy & kiểm thử trên máy
 
 ```powershell
 cd c:\Users\Admin\Desktop\ANGULAR\flower-atelier
 npm install
+
+# Chạy máy chủ phát triển tại http://localhost:4300/
 npm start
-```
 
-Mở trình duyệt tại: `http://localhost:4300/`
+# Chạy bộ 11 unit test (Vitest + Angular TestBed + HttpTestingController)
+npm test -- --watch=false
 
-## Các lệnh kiểm thử & đóng gói
-
-```powershell
-# Chạy unit tests (Vitest)
-npm test
-
-# Build bản production (kết quả tại dist/flower-atelier/browser)
+# Đóng gói production (đầu ra tại dist/flower-atelier/browser)
 npm run build
 ```
 
-## Cấu trúc dữ liệu & thiết lập nhanh
-
-- **Cấu hình Backend API (Render / MongoDB)**: [`src/app/config/api.config.ts`](src/app/config/api.config.ts) (mặc định trỏ `https://fleureshop.onrender.com/api`; có thể ghi đè qua `localStorage.setItem('fleure-boutique:api-base', 'http://127.0.0.1:5000/api')` khi chạy backend cục bộ).
-- **Bảng màu Hồng Pastel / Đỏ Ruby & Font chữ**: [`src/styles.css`](src/styles.css) và [`src/index.html`](src/index.html).
-- **Hợp đồng kiểu dữ liệu & REST API**: [`src/app/models/atelier.models.ts`](src/app/models/atelier.models.ts).
-- **Danh mục dự phòng, bản đồ tách nền studio, 6 dịp tặng, 10 cành hoa Đà Lạt, 3 giấy gói Pháp & 3 mã ưu đãi**: [`src/app/data/atelier-catalog.ts`](src/app/data/atelier-catalog.ts).
-- **Signals Store & HTTP Client (`GET /api/products`, `POST /api/orders`, `GET /api/orders`)**: [`src/app/services/atelier.service.ts`](src/app/services/atelier.service.ts).
+## Cấu trúc mã nguồn trọng tâm
+- **Khung Mobile-First `430px` & Design Tokens:** [`src/styles.css`](src/styles.css), [`src/app/app.css`](src/app/app.css), [`src/app/components/bottom-nav/`](src/app/components/bottom-nav/)
+- **Cấu hình Backend Render / MongoDB & Locale `vi-VN`:** [`src/app/config/api.config.ts`](src/app/config/api.config.ts), [`src/app/app.config.ts`](src/app/app.config.ts)
+- **Định tuyến Lazy Loading SEO:** [`src/app/app.routes.ts`](src/app/app.routes.ts)
+- **Signals Store & REST Client 6 Collection:** [`src/app/services/atelier.service.ts`](src/app/services/atelier.service.ts)
+- **Thẻ sản phẩm tái sử dụng (`input()` / `output()` / `DecimalPipe`):** [`src/app/components/shared/product-card/`](src/app/components/shared/product-card/)
+- **SPA Rewrite triển khai Vercel:** [`vercel.json`](vercel.json)

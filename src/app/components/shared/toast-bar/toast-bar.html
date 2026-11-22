@@ -1,0 +1,31 @@
+@if (atelier.toastState(); as toast) {
+  <div class="toast-region" role="status" aria-live="polite" aria-atomic="true">
+    <div class="toast-pill surface-espresso" data-surface="dark">
+      <span class="toast-icon" aria-hidden="true">
+        <app-icon name="check" [size]="16" />
+      </span>
+
+      <span class="toast-text">{{ toast.message }}</span>
+
+      @if (toast.canUndo) {
+        <button
+          type="button"
+          class="toast-undo-btn"
+          (click)="atelier.undoRemoveCartItem()"
+        >
+          <app-icon name="undo-2" [size]="14" />
+          <span>Hoàn tác</span>
+        </button>
+      }
+
+      <button
+        type="button"
+        class="toast-close-btn"
+        aria-label="Đóng thông báo"
+        (click)="atelier.dismissToast()"
+      >
+        <app-icon name="x" [size]="15" />
+      </button>
+    </div>
+  </div>
+}

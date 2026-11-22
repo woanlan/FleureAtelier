@@ -74,10 +74,12 @@
   --success-bg: #F0FDF4;
   --success-border: #BBF7D0;
 
-  /* 7. Nhịp bố cục, Bo góc & Bóng lớp nổi (chỉ áp cho Popover / Drawer) */
-  --container-max: 1240px;
-  --gutter-inline: clamp(1rem, 4vw, 2.5rem);
-  --section-py: clamp(4rem, 7vw, 6.5rem);
+  /* 7. Nhịp bố cục Mobile-First 430px (chuẩn yêu cầu ASM 1, kể cả trên Desktop) */
+  --app-max-width: 430px;
+  --container-max: 430px;
+  --gutter-inline: 16px;
+  --section-py: 2.5rem;
+  --bottom-nav-height: 68px;
 
   --radius-xs: 6px;
   --radius-sm: 10px;
@@ -122,7 +124,8 @@ body {
   font-size: 1rem;
   line-height: 1.6;
   color: var(--ink-primary);
-  background-color: var(--bg-cream);
+  /* Nền hồng pastel dịu làm phông ngoài cho khung ứng dụng Mobile 430px căn giữa trên Desktop */
+  background-color: #f7e9ed;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   overflow-x: clip;

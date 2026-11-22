@@ -1,0 +1,607 @@
+/* Trang Chi tiết mẫu hoa Mobile-First 430px (FLEURÉ) */
+
+:host {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  overflow-x: clip;
+}
+
+.detail-page {
+  padding: 0.625rem 0 2.25rem;
+  background-color: var(--bg-cream);
+}
+
+/* Đường dẫn 3 cấp 1 dòng */
+.detail-breadcrumb {
+  margin-bottom: 0.625rem;
+}
+
+.breadcrumb-list {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  min-width: 0;
+  overflow: hidden;
+  font-size: 0.8125rem;
+  color: var(--ink-muted);
+}
+
+.breadcrumb-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  flex-shrink: 0;
+  min-width: 0;
+}
+
+.breadcrumb-item--current {
+  flex: 1 1 auto;
+}
+
+.breadcrumb-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  color: var(--ink-secondary);
+  white-space: nowrap;
+  transition: color 160ms var(--ease-editorial);
+}
+
+.breadcrumb-link:hover {
+  color: var(--primary);
+}
+
+.breadcrumb-sep {
+  color: var(--ink-muted);
+  flex-shrink: 0;
+}
+
+.breadcrumb-current {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-weight: 600;
+  color: var(--text-title);
+}
+
+/* Ảnh bó hoa tỷ lệ 4 / 4.2 + badge góc trái */
+.detail-media-frame {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 4 / 4.2;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  background-color: var(--bg-cream-alt);
+  border: 1px solid var(--border-subtle);
+}
+
+.detail-media-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.detail-badge {
+  position: absolute;
+  top: 0.75rem;
+  left: 0.75rem;
+  display: inline-flex;
+  align-items: center;
+  padding: 0.28rem 0.68rem;
+  border-radius: var(--radius-pill);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  line-height: 1.2;
+}
+
+.detail-badge--sale {
+  background-color: var(--primary);
+  color: var(--primary-foreground);
+}
+
+.detail-badge--new {
+  background-color: rgba(255, 245, 247, 0.94);
+  color: var(--text-title);
+  border: 1px solid var(--border-strong);
+}
+
+/* Thông tin chính: danh mục, lượt đặt, H1 & giá */
+.detail-header {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.detail-meta-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.detail-category-tag {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0.35rem 0.85rem;
+  border-radius: var(--radius-pill);
+  background-color: var(--primary-light);
+  color: var(--gold-accent-ink);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  transition:
+    background-color 160ms var(--ease-editorial),
+    color 160ms var(--ease-editorial);
+}
+
+.detail-category-tag:hover {
+  background-color: var(--primary);
+  color: var(--primary-foreground);
+}
+
+.detail-sold {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--ink-muted);
+  white-space: nowrap;
+}
+
+.detail-title {
+  font-family: var(--font-serif);
+  font-size: 1.5rem;
+  font-weight: 700;
+  line-height: 1.24;
+  color: var(--text-title);
+}
+
+.detail-price-row {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.125rem;
+}
+
+.detail-price {
+  font-size: 1.4375rem;
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--primary);
+}
+
+.detail-old-price {
+  font-size: 0.9375rem;
+  color: var(--ink-muted);
+  text-decoration: line-through;
+}
+
+.detail-savings-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.15rem 0.5rem;
+  border-radius: var(--radius-pill);
+  background-color: var(--primary-light);
+  color: var(--text-title);
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+/* Ý nghĩa bó hoa & mô tả chi tiết */
+.detail-story-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-top: 1rem;
+  padding: 0.95rem 1rem;
+  border-radius: var(--radius-md);
+  background-color: var(--bg-cream-alt);
+  border: 1px solid var(--border-subtle);
+}
+
+.meaning-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--gold-accent-ink);
+}
+
+.meaning-quote {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 0.96875rem;
+  line-height: 1.48;
+  color: var(--text-title);
+  text-wrap: pretty;
+}
+
+.meaning-description {
+  font-size: 0.875rem;
+  line-height: 1.6;
+  color: var(--ink-secondary);
+  text-wrap: pretty;
+}
+
+/* 3 cam kết dịch vụ */
+.detail-promises {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.5rem;
+  margin: 0.875rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.promise-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 0.25rem;
+  min-width: 0;
+  padding: 0.65rem 0.35rem;
+  border-radius: var(--radius-sm);
+  background-color: var(--surface-card);
+  border: 1px solid var(--border-subtle);
+}
+
+.promise-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background-color: var(--primary-light);
+  color: var(--primary);
+  margin-bottom: 0.1rem;
+}
+
+.promise-title {
+  font-size: 0.75rem;
+  font-weight: 700;
+  line-height: 1.25;
+  color: var(--text-title);
+}
+
+.promise-sub {
+  font-size: 0.75rem;
+  line-height: 1.3;
+  color: var(--ink-muted);
+  text-wrap: balance;
+}
+
+/* Chọn số lượng, tạm tính & cụm nút đặt mua */
+.purchase-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 0.875rem;
+  margin-top: 1rem;
+  padding: 1rem;
+  border-radius: var(--radius-md);
+  background-color: var(--surface-card);
+  border: 1px solid var(--border-subtle);
+}
+
+.qty-subtotal-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.qty-group,
+.subtotal-group {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.qty-group {
+  gap: 0.35rem;
+}
+
+.subtotal-group {
+  align-items: flex-end;
+  gap: 0.2rem;
+  text-align: right;
+}
+
+.qty-label,
+.subtotal-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--ink-muted);
+}
+
+.qty-stepper {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  background-color: var(--surface-elevated);
+  overflow: hidden;
+}
+
+.qty-step-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: var(--ink-primary);
+}
+
+.qty-step-inner {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-xs);
+  transition:
+    background-color 150ms var(--ease-editorial),
+    color 150ms var(--ease-editorial);
+}
+
+.qty-step-btn:hover:not(:disabled) .qty-step-inner {
+  background-color: var(--primary-light);
+  color: var(--primary);
+}
+
+.qty-value {
+  min-width: 2.35rem;
+  text-align: center;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--ink-primary);
+}
+
+.subtotal-value {
+  font-size: 1.25rem;
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--primary);
+}
+
+.action-cluster {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5625rem;
+}
+
+.action-primary-row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.5625rem;
+}
+
+.btn-outline-ruby,
+.btn-primary-ruby,
+.btn-quick-card {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  min-width: 0;
+  min-height: 46px;
+  padding: 0.625rem 0.75rem;
+  border-radius: var(--radius-pill);
+  font-size: 0.875rem;
+  font-weight: 600;
+  line-height: 1.2;
+  white-space: nowrap;
+  transition:
+    background-color 160ms var(--ease-editorial),
+    border-color 160ms var(--ease-editorial),
+    color 160ms var(--ease-editorial),
+    transform 150ms var(--ease-editorial);
+}
+
+.btn-outline-ruby {
+  border: 1.5px solid var(--primary);
+  background-color: var(--surface-card);
+  color: var(--primary);
+}
+
+.btn-outline-ruby:hover {
+  background-color: var(--primary-light);
+}
+
+.btn-primary-ruby {
+  border: 1.5px solid var(--primary);
+  background-color: var(--primary);
+  color: var(--primary-foreground);
+}
+
+.btn-primary-ruby:hover {
+  background-color: var(--primary-hover);
+  border-color: var(--primary-hover);
+}
+
+.btn-quick-card {
+  width: 100%;
+  border: 1px solid var(--border-strong);
+  background-color: var(--primary-light);
+  color: var(--text-title);
+}
+
+.btn-quick-card:hover {
+  border-color: var(--primary);
+  background-color: var(--bg-cream-alt);
+}
+
+.btn-outline-ruby:active,
+.btn-primary-ruby:active,
+.btn-quick-card:active {
+  transform: scale(0.98);
+}
+
+/* Sản phẩm liên quan 2 cột */
+.related-section {
+  margin-top: 1.75rem;
+  padding-top: 1.375rem;
+  border-top: 1px solid var(--border-subtle);
+}
+
+.related-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 0.875rem;
+}
+
+.related-heading {
+  font-family: var(--font-serif);
+  font-size: 1.25rem;
+  font-weight: 700;
+  line-height: 1.25;
+  color: var(--text-title);
+}
+
+.related-more-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2rem;
+  min-height: 44px;
+  padding-inline: 0.25rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--primary);
+  white-space: nowrap;
+}
+
+.related-more-link:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.related-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+/* Trạng thái không tìm thấy sản phẩm */
+.not-found-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 0.65rem;
+  margin-top: 1.5rem;
+  padding: 2.25rem 1.25rem;
+  border-radius: var(--radius-md);
+  background-color: var(--surface-card);
+  border: 1px solid var(--border-subtle);
+}
+
+.not-found-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background-color: var(--primary-light);
+  color: var(--primary);
+}
+
+.not-found-title {
+  font-family: var(--font-serif);
+  font-size: 1.375rem;
+  font-weight: 700;
+  line-height: 1.25;
+  color: var(--text-title);
+}
+
+.not-found-desc {
+  max-width: 30ch;
+  font-size: 0.875rem;
+  line-height: 1.55;
+  color: var(--ink-secondary);
+  text-wrap: pretty;
+}
+
+.not-found-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  min-height: 44px;
+  margin-top: 0.5rem;
+  padding: 0.625rem 1.25rem;
+  border-radius: var(--radius-pill);
+  background-color: var(--primary);
+  color: var(--primary-foreground);
+  font-size: 0.875rem;
+  font-weight: 600;
+  transition: background-color 160ms var(--ease-editorial);
+}
+
+.not-found-btn:hover {
+  background-color: var(--primary-hover);
+}
+
+/* Khung chờ Loading Skeleton */
+.detail-skeleton {
+  display: flex;
+  flex-direction: column;
+  gap: 0.875rem;
+  padding-top: 0.5rem;
+}
+
+.skeleton-media,
+.skeleton-bar,
+.skeleton-box {
+  background-color: var(--bg-cream-alt);
+}
+
+.skeleton-media {
+  width: 100%;
+  aspect-ratio: 4 / 4.2;
+  border-radius: var(--radius-lg);
+}
+
+.skeleton-bar {
+  height: 1.125rem;
+  border-radius: var(--radius-xs);
+}
+
+.skeleton-bar--crumb {
+  width: 55%;
+  height: 0.875rem;
+}
+
+.skeleton-bar--title {
+  width: 82%;
+  height: 1.75rem;
+}
+
+.skeleton-bar--price {
+  width: 45%;
+  height: 1.5rem;
+}
+
+.skeleton-box {
+  height: 7.5rem;
+  border-radius: var(--radius-md);
+}

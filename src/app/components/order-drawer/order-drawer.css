@@ -39,35 +39,9 @@
   transition: opacity 500ms var(--ease-sheet);
 }
 
-/* Sân khấu Thiệp gấp 3D bên trái (Desktop >= 1024px) */
+/* Sân khấu Thiệp gấp 3D: luôn hiển thị trực tiếp bên trong ngăn kéo 430px để căn gọn khung di động */
 .greeting-stage-desktop {
   display: none;
-}
-
-@media (min-width: 1024px) {
-  .greeting-stage-desktop {
-    position: absolute;
-    inset: 0 480px 0 0;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 1.375rem;
-    padding: 2rem;
-    opacity: 0;
-    transform: translateY(12px);
-    transition: opacity 240ms ease-in, transform 240ms ease-in;
-  }
-
-  .order-overlay.is-open .greeting-stage-desktop {
-    opacity: 1;
-    transform: translateY(0);
-    transition: opacity 460ms var(--ease-editorial) 80ms, transform 460ms var(--ease-editorial) 80ms;
-  }
-
-  .greeting-preview-inline {
-    display: none;
-  }
 }
 
 .greeting-stage-badge,
@@ -248,28 +222,30 @@
   color: var(--gold-accent-ink);
 }
 
-/* Ngăn kéo đặt hoa kem ấm bên phải */
+/* Ngăn kéo đặt hoa kem ấm căn đúng khung Mobile 430px giữa màn hình */
 .order-drawer-panel {
   position: absolute;
-  inset: 0 0 0 auto;
-  width: min(480px, 100%);
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: min(var(--app-max-width, 430px), 100%);
   height: 100%;
   max-height: 100dvh;
   display: flex;
   flex-direction: column;
   overflow: clip;
   background: var(--bg-cream);
-  border-left: 1px solid var(--border-subtle);
+  border-inline: 1px solid var(--border-subtle);
   box-shadow: var(--elevation-drawer);
-  transform: translateX(100%);
-  transition: transform 350ms var(--ease-sheet);
+  transform: translate3d(-50%, 100%, 0);
+  transition: transform 340ms var(--ease-sheet);
   will-change: transform;
   outline: none;
 }
 
 .order-overlay.is-open .order-drawer-panel {
-  transform: translateX(0);
-  transition: transform 500ms var(--ease-sheet);
+  transform: translate3d(-50%, 0, 0);
+  transition: transform 420ms var(--ease-sheet);
 }
 
 .drawer-header {
@@ -1128,73 +1104,6 @@
 .btn-confirmed-ghost:hover {
   background: var(--bg-cream-alt);
   color: var(--ink-primary);
-}
-
-@media (min-width: 440px) {
-  .timeslot-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-}
-
-@media (min-width: 480px) {
-  .confirmed-row {
-    flex-direction: row;
-    align-items: baseline;
-    justify-content: space-between;
-    gap: 1rem;
-  }
-
-  .confirmed-row dd {
-    text-align: right;
-  }
-
-  .size-options-grid {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-
-  .choice-size-card {
-    padding: 0.75rem;
-    justify-content: flex-start;
-  }
-
-  .choice-size-top,
-  .choice-addon-body {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 0.125rem;
-  }
-
-  .addon-options-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .suggestion-chips-wrap {
-    flex-direction: row;
-    flex-wrap: wrap;
-  }
-}
-
-@media (min-width: 640px) {
-  .drawer-header {
-    padding: 1.125rem 1.5rem 1rem;
-  }
-
-  .drawer-body {
-    padding: 1.25rem 1.5rem;
-    gap: 1.375rem;
-  }
-
-  .drawer-validation-alert {
-    padding: 0.75rem 1.5rem;
-  }
-
-  .drawer-footer {
-    padding: 1rem 1.5rem;
-  }
-
-  .confirmed-card {
-    padding: 1.375rem;
-  }
 }
 
 @media (prefers-reduced-motion: reduce) {

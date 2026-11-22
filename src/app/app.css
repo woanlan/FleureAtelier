@@ -1,6 +1,6 @@
 /* ==========================================================================
-   KHUNG VỎ ỨNG DỤNG GỐC — FLEURÉ FLOWER BOUTIQUE
-   Đảm bảo không tràn ngang (375px -> 1920px) & hỗ trợ Skip Link chuẩn WCAG AA
+   KHUNG ỨNG DỤNG DI ĐỘNG CĂN GIỮA 430PX — FLEURÉ FLOWER BOUTIQUE
+   Đáp ứng đúng yêu cầu ASM 1: hiển thị chuẩn khung Mobile 430px kể cả trên Desktop
    ========================================================================== */
 
 :host {
@@ -9,11 +9,25 @@
   width: 100%;
   max-width: 100%;
   overflow-x: clip;
-  background-color: var(--bg-cream);
   color: var(--ink-primary);
 }
 
+.atelier-page-shell.website {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: var(--app-max-width, 430px);
+  min-height: 100dvh;
+  margin-inline: auto;
+  padding-bottom: var(--bottom-nav-height, 68px);
+  background-color: var(--bg-cream);
+  box-shadow: 0 0 50px rgba(157, 37, 71, 0.14);
+  overflow-x: clip;
+}
+
 .atelier-main {
+  flex: 1 0 auto;
   display: block;
   width: 100%;
   max-width: 100%;
@@ -21,11 +35,11 @@
   outline: none;
 }
 
-/* Ẩn Skip Link phía trên khung nhìn bằng translateY âm cho đến khi nhận focus từ bàn phím (luật N11) */
+/* Ẩn Skip Link phía trên khung nhìn bằng translateY âm cho đến khi nhận focus từ bàn phím */
 .skip-link {
   position: fixed;
   top: 0.75rem;
-  left: 0.75rem;
+  left: 50%;
   z-index: 200;
   display: inline-flex;
   align-items: center;
@@ -38,7 +52,7 @@
   font-size: 0.875rem;
   font-weight: 600;
   box-shadow: var(--elevation-popover);
-  transform: translateY(-200%);
+  transform: translate(-50%, -220%);
   opacity: 0;
   pointer-events: none;
   transition:
@@ -48,7 +62,7 @@
 
 .skip-link:focus,
 .skip-link:focus-visible {
-  transform: translateY(0);
+  transform: translate(-50%, 0);
   opacity: 1;
   pointer-events: auto;
   outline: 2px solid var(--gold-metallic);

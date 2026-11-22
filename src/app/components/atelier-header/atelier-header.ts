@@ -10,109 +10,149 @@ import {
   signal,
   viewChild,
 } from '@angular/core';
-import { IconComponent } from '../shared/icon/icon';
+import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { AtelierService } from '../../services/atelier.service';
+import { IconComponent } from '../shared/icon/icon';
 
-/** Cấu trúc một mục điều hướng neo trên thanh đầu trang */
-interface AtelierNavItem {
+/** Cấu trúc một mục điều hướng đa trang trên thanh đầu trang */
+interface HeaderNavItem {
   readonly label: string;
-  readonly sectionId: string;
-  readonly href: string;
+  readonly route: string;
+  readonly fragment?: string;
+  readonly exact?: boolean;
 }
 
 /**
- * Thanh điều hướng cố định đầu trang (`<app-atelier-header>`).
- * - Giữ bề mặt Hồng Pastel mờ (`rgba(255, 245, 247, 0.94)`) kèm `backdrop-filter: blur(12px)`
- *   để chữ mực `--ink-primary` luôn đạt độ tương phản > 12:1 trên cả nền Ruby đậm lẫn nền sáng.
- * - Trên màn hình <= 860px, thu gọn danh sách liên kết vào ngăn trượt mượt, nút chạm chuẩn 44x44px.
+ * Thanh điều hướng đa trang cố định đầu trang (`<app-atelier-header>`).
+ * - Kết nối liền mạch Trang chủ editorial (`/`, `/#tu-bo-hoa`) với toàn bộ trang cửa hàng:
+ *   `/products`, `/promotions`, `/bai_viet`, `/experience`, `/cart`.
+ * - Thanh tìm kiếm trượt mượt kết nối `GET /api/products?search=...` và chuyển hướng `/products?search=...`.
+ * - Giữ nguyên 1 dòng gọn gàng từ `1024px` trở lên (không gãy dòng), thu gọn vào ngăn kéo ở `<= 1023px`.
  */
 @Component({
   selector: 'app-atelier-header',
   standalone: true,
-  imports: [IconComponent],
+  imports: [RouterLink, RouterLinkActive, IconComponent],
   templateUrl: './atelier-header.html',
   styleUrl: './atelier-header.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AtelierHeader {
   readonly atelier = inject(AtelierService);
+  private readonly router = inject(Router);
   private readonly platformId = inject(PLATFORM_ID);
   private readonly isBrowser = isPlatformBrowser(this.platformId);
 
-  /** Trạng thái đóng/mở ngăn điều hướng trên thiết bị di động (<= 860px) */
+  /** Trạng thái đóng/mở ngăn điều hướng di động (<= 1023px) */
   readonly mobileMenuOpen = signal<boolean>(false);
 
-  /** Tham chiếu nút bật/tắt menu di động để trả lại focus khi nhấn Escape */
+  /** Trạng thái đóng/mở thanh tìm kiếm hoa mở rộng phía dưới header */
+  readonly searchBarOpen = signal<boolean>(false);
+
+  /** Tham chiếu nút menu & ô tìm kiếm để quản lý focus chuẩn bàn phím */
   private readonly mobileMenuToggleRef =
     viewChild<ElementRef<HTMLButtonElement>>('mobileMenuToggle');
+  private readonly searchInputRef =
+    viewChild<ElementRef<HTMLInputElement>>('desktopSearchInput');
 
-  /** Nhãn đọc màn hình đầy đủ gắn trực tiếp trên nút Đặt hoa (tránh aria-label trên thẻ span con) */
+  /** Nhãn đọc màn hình đầy đủ cho nút Đặt nhanh (Thiệp 3D) */
   readonly orderCtaAriaLabel = computed<string>(() => {
     const stems = this.atelier.totalCustomStems();
-    return stems > 0
-      ? `Đặt hoa – đang chọn ${stems} cành tự phối`
-      : 'Đặt hoa';
+    return stems > 0 ? `Đặt hoa – đang chọn ${stems} cành tự phối` : 'Đặt hoa nhanh';
   });
 
-  /** Danh sách 5 phân khu chính của FLEURÉ — Flower Boutique */
-  readonly navItems: readonly AtelierNavItem[] = [
-    { label: 'Bộ sưu tập', sectionId: 'bo-suu-tap', href: '#bo-suu-tap' },
-    { label: 'Danh mục dịp', sectionId: 'theo-dip', href: '#theo-dip' },
-    { label: 'Tự phối hoa', sectionId: 'tu-bo-hoa', href: '#tu-bo-hoa' },
-    { label: 'Mùa Đà Lạt', sectionId: 'lich-hoa', href: '#lich-hoa' },
-    { label: 'Về FLEURÉ', sectionId: 'xuong-hoa', href: '#xuong-hoa' },
+  /** Nhãn đọc màn hình cho nút Giỏ hoa đa món */
+  readonly cartAriaLabel = computed<string>(() => {
+    const count = this.atelier.cartCount();
+    return count > 0 ? `Giỏ hoa, hiện có ${count} sản phẩm` : 'Giỏ hoa đang trống';
+  });
+
+  /** 6 mục điều hướng chính ngắn gọn, tối ưu không gãy dòng ở 1024px */
+  readonly navItems: readonly HeaderNavItem[] = [
+    { label: 'Trang chủ', route: '/', exact: true },
+    { label: 'Sản phẩm', route: '/products' },
+    { label: 'Tự phối', route: '/', fragment: 'tu-bo-hoa' },
+    { label: 'Ưu đãi', route: '/promotions' },
+    { label: 'Bài viết', route: '/bai_viet' },
+    { label: 'Trải nghiệm', route: '/experience' },
   ];
 
-  /** Bật/tắt ngăn menu điều hướng trên màn hình hẹp */
   toggleMobileMenu(): void {
+    this.searchBarOpen.set(false);
     this.mobileMenuOpen.update((open) => !open);
   }
 
-  /** Đóng ngăn menu di động */
   closeMobileMenu(): void {
     if (this.mobileMenuOpen()) {
       this.mobileMenuOpen.set(false);
     }
   }
 
-  /**
-   * Cuộn mượt tới phân khu đích khi bấm liên kết điều hướng và tự động đóng ngăn di động.
-   */
-  navigateToSection(event: MouseEvent, sectionId: string): void {
+  toggleSearchBar(): void {
     this.closeMobileMenu();
-
-    if (!this.isBrowser) {
-      return;
-    }
-
-    const targetEl = document.getElementById(sectionId);
-    if (!targetEl) {
-      return;
-    }
-
-    event.preventDefault();
-    const prefersReduced =
-      typeof window.matchMedia === 'function' &&
-      window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    targetEl.scrollIntoView({
-      behavior: prefersReduced ? 'auto' : 'smooth',
-      block: 'start',
-    });
-
-    // Đồng bộ hash trên thanh địa chỉ mà không gây giật khung nhìn
-    try {
-      window.history.replaceState(null, '', `#${sectionId}`);
-    } catch {
-      // Bỏ qua an toàn nếu môi trường iframe/test giới hạn history API
+    const next = !this.searchBarOpen();
+    this.searchBarOpen.set(next);
+    if (next && this.isBrowser) {
+      setTimeout(() => {
+        this.searchInputRef()?.nativeElement.focus();
+      }, 60);
     }
   }
 
-  /**
-   * Mở ngăn kéo đặt hoa: ưu tiên bó hoa tự phối nếu người dùng đã chọn >= 3 cành,
-   * ngược lại mở mẫu hoa treo đang chọn.
-   */
-  openQuickOrder(): void {
+  closeAllPanels(): void {
     this.closeMobileMenu();
+    this.searchBarOpen.set(false);
+  }
+
+  onSearchInput(event: Event): void {
+    const value = (event.target as HTMLInputElement).value;
+    this.atelier.searchQuery.set(value);
+  }
+
+  /** Gửi từ khóa tìm kiếm sang API MongoDB & chuyển tới `/products?search=...` */
+  onSearchSubmit(event: Event): void {
+    event.preventDefault();
+    const query = this.atelier.searchQuery().trim();
+    this.atelier.searchProductsFromApi(query);
+    this.closeAllPanels();
+
+    void this.router.navigate(['/products'], {
+      queryParams: query ? { search: query } : {},
+    });
+  }
+
+  clearSearch(): void {
+    this.atelier.searchQuery.set('');
+    this.atelier.searchProductsFromApi('');
+  }
+
+  /** Điều hướng an toàn tới phân khu neo trên Trang chủ (ví dụ: `#tu-bo-hoa`) từ bất kỳ route nào */
+  onNavItemClick(event: MouseEvent, item: HeaderNavItem): void {
+    this.closeAllPanels();
+
+    if (!item.fragment || !this.isBrowser) {
+      return;
+    }
+
+    const currentPath = this.router.url.split(/[?#]/)[0];
+    if (currentPath === '/' || currentPath === '') {
+      const targetEl = document.getElementById(item.fragment);
+      if (targetEl) {
+        event.preventDefault();
+        const prefersReduced =
+          typeof window.matchMedia === 'function' &&
+          window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        targetEl.scrollIntoView({
+          behavior: prefersReduced ? 'auto' : 'smooth',
+          block: 'start',
+        });
+      }
+    }
+  }
+
+  /** Mở ngăn kéo đặt nhanh + thiệp gấp 3D */
+  openQuickOrder(): void {
+    this.closeAllPanels();
     if (this.atelier.totalCustomStems() >= 3) {
       this.atelier.openOrderForCustomBouquet();
     } else {
@@ -120,20 +160,14 @@ export class AtelierHeader {
     }
   }
 
-  /** Cho phép đóng nhanh menu di động bằng phím Escape và trả focus về nút mở menu */
   @HostListener('document:keydown.escape')
   onEscapeKey(): void {
+    if (this.searchBarOpen()) {
+      this.searchBarOpen.set(false);
+    }
     if (this.mobileMenuOpen()) {
       this.mobileMenuOpen.set(false);
       this.mobileMenuToggleRef()?.nativeElement.focus();
-    }
-  }
-
-  /** Tự động đóng ngăn menu di động khi nới rộng cửa sổ vượt ngưỡng 1023px */
-  @HostListener('window:resize')
-  onWindowResize(): void {
-    if (this.isBrowser && window.innerWidth > 1023 && this.mobileMenuOpen()) {
-      this.mobileMenuOpen.set(false);
     }
   }
 }
